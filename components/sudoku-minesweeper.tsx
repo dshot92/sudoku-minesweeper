@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -18,7 +18,6 @@ export default function SudokuMinesweeper() {
   const [gameOver, setGameOver] = useState(false)
   const [gameWon, setGameWon] = useState(false)
   const [message, setMessage] = useState("")
-  const gridRef = useRef<CellState[][]>([])
 
   const color = [
     "#FFD700", // bright yellow
@@ -30,30 +29,26 @@ export default function SudokuMinesweeper() {
     "#20B2AA", // light sea green
     "#B8B8B8"  // medium gray
   ]
-
   // Initialize game
   const initializeGame = () => {
     let newSize = parseInt(inputSize) || 5;
     // Clamp the size between 4 and 8
-    newSize = Math.max(4, Math.min(7, newSize));
     setGridSize(newSize);
     setInputSize(newSize.toString());
     setMessage("");
 
     const newGrid = generateSolvedGrid(newSize);
     setGrid(newGrid);
-    gridRef.current = newGrid;
     setGameOver(false);
     setGameWon(false);
   }
 
   // Handle cell click
   const handleCellClick = (row: number, col: number) => {
-    if (gameOver || gameWon || gridRef.current[row][col].revealed) return;
+    if (gameOver || gameWon || grid[row][col].revealed) return;
 
-    const result = handleCellClickLogic(gridRef.current, row, col, gridSize);
+    const result = handleCellClickLogic(grid, row, col, gridSize);
     setGrid(result.newGrid);
-    gridRef.current = result.newGrid;
     setGameOver(result.gameOver);
     setGameWon(result.gameWon);
 
@@ -86,13 +81,15 @@ export default function SudokuMinesweeper() {
           <div className="flex items-center gap-1 justify-center">
             <Button
               onClick={() => {
-                const newSize = Math.max(4, parseInt(inputSize) - 1)
+                const newSize = Math.max(3, parseInt(inputSize) - 1)
                 setInputSize(newSize.toString())
               }}
             >
               -
             </Button>
-            <Button>
+            <Button
+            // variant="outline"
+            >
               {inputSize + "x" + inputSize}
             </Button>
             <Button
@@ -112,7 +109,7 @@ export default function SudokuMinesweeper() {
       </div>
 
       <div
-        className="grid w-full text-black"
+        className="grid w-full mb-4 aspect-square max-w-[80vh] mx-auto text-black font-bold text-4xl"
         style={{
           gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`
         }}
@@ -124,13 +121,9 @@ export default function SudokuMinesweeper() {
             return (
               <div
                 key={`${rowIndex}-${colIndex}`}
-                className={`
-                  flex items-center justify-center aspect-square border
-                  ${cell.revealed ? "text-black font-bold text-[min(8vw,4rem)]" : "cursor-pointer hover:opacity-90"}
-                `}
+                className={"flex items-center justify-center aspect-square border"}
                 style={{
                   backgroundColor: backgroundColor,
-                  color: cell.revealed ? 'black' : backgroundColor,
                 }}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
               >
@@ -141,7 +134,6 @@ export default function SudokuMinesweeper() {
                       alt="Mine"
                       width={24}
                       height={24}
-                      className="w-[min(8vw,4rem)] h-[min(8vw,4rem)]"
                     />
                   ) : cell.value
                 )}
@@ -152,7 +144,7 @@ export default function SudokuMinesweeper() {
       </div>
 
       {message && (
-        <Alert className="my-4 bg-gray-800 border-gray-700">
+        <Alert>
           <AlertDescription>{message}</AlertDescription>
         </Alert>
       )}
