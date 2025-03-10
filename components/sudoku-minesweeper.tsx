@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   CellState,
@@ -34,7 +33,7 @@ export default function SudokuMinesweeper() {
   const initializeGame = () => {
     let newSize = parseInt(inputSize) || 5;
     // Clamp the size between 4 and 8
-    newSize = Math.max(4, Math.min(8, newSize));
+    newSize = Math.max(4, Math.min(7, newSize));
     setGridSize(newSize);
     setInputSize(newSize.toString());
     setMessage("");
@@ -96,7 +95,7 @@ export default function SudokuMinesweeper() {
             </Button>
             <Button
               onClick={() => {
-                const newSize = Math.min(8, parseInt(inputSize) + 1)
+                const newSize = Math.min(7, parseInt(inputSize) + 1)
                 setInputSize(newSize.toString())
               }}
             >
