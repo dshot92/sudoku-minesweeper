@@ -70,8 +70,8 @@ export default function SudokuMinesweeper() {
   }
 
   return (
-    <div className="flex flex-col items-center max-w-4xl w-full p-2">
-      <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
+    <div className="flex flex-col max-w-2xl w-full mx-auto p-2">
+      <div className="m-4 flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
         <div className="flex items-center gap-2">
           <label htmlFor="grid-size" className="whitespace-nowrap">
             Grid Size:
@@ -87,15 +87,11 @@ export default function SudokuMinesweeper() {
             >
               -
             </Button>
-            <Input
-              id="grid-size"
-              type="number"
-              min="4"
-              max="8"
-              value={inputSize}
-              readOnly
-              className="w-16 text-center mx-1 bg-gray-800 text-white cursor-default"
-            />
+            <div
+              className="w-16 mx-1 bg-gray-800 text-white h-8 flex items-center justify-center"
+            >
+              {inputSize}
+            </div>
             <Button
               variant="outline"
               onClick={() => {
@@ -108,6 +104,7 @@ export default function SudokuMinesweeper() {
             </Button>
           </div>
         </div>
+
         <Button onClick={handleSizeChange} className="flex items-center gap-2">
           <RefreshCw className="h-4 w-4" />
           New Game
