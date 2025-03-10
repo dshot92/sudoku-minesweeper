@@ -7,63 +7,76 @@ export type CellState = {
 
 /**
  * Generate a Latin square (n×n grid where each row and column contains n distinct values)
+ * that also ensures each component has distinct values
  */
-const generateLatinSquare = (size: number): number[][] => {
+const generateLatinSquare = (
+  size: number,
+  componentGrid: number[][]
+): number[][] | null => {
   // Initialize grid with zeros
   const grid: number[][] = Array(size)
     .fill(null)
     .map(() => Array(size).fill(0));
 
-  // Fill the first row with 1 to n
-  for (let col = 0; col < size; col++) {
-    grid[0][col] = col + 1;
-  }
-
-  // Fill the rest of the grid using the pattern where each row is the previous row shifted right
-  for (let row = 1; row < size; row++) {
-    for (let col = 0; col < size; col++) {
-      grid[row][col] = grid[row - 1][(col + 1) % size];
+  // Helper function to check if a value is valid at a position
+  const isValid = (row: number, col: number, value: number): boolean => {
+    // Check row
+    for (let c = 0; c < size; c++) {
+      if (c !== col && grid[row][c] === value) return false;
     }
-  }
 
-  // Shuffle rows and columns to create a more random Latin square
-  // (while preserving the Latin square property)
-  const shuffleIndices = () => {
-    const indices = Array.from({ length: size }, (_, i) => i);
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
+    // Check column
+    for (let r = 0; r < size; r++) {
+      if (r !== row && grid[r][col] === value) return false;
     }
-    return indices;
+
+    // Check component
+    const currentComponent = componentGrid[row][col];
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (componentGrid[r][c] === currentComponent && grid[r][c] === value) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   };
 
-  // Shuffle rows
-  const rowIndices = shuffleIndices();
-  const shuffledRows = rowIndices.map(i => [...grid[i]]);
-
-  // Replace grid rows with shuffled rows
-  for (let i = 0; i < size; i++) {
-    grid[i] = shuffledRows[i];
-  }
-
-  // Shuffle columns
-  const colIndices = shuffleIndices();
-  const shuffledGrid = Array(size).fill(null).map(() => Array(size).fill(0));
-
-  for (let row = 0; row < size; row++) {
-    for (let col = 0; col < size; col++) {
-      shuffledGrid[row][col] = grid[row][colIndices[col]];
+  // Recursive function to fill the grid
+  const fillGrid = (row: number, col: number): boolean => {
+    if (col === size) {
+      return fillGrid(row + 1, 0);
     }
-  }
+    if (row === size) {
+      return true;
+    }
 
-  return shuffledGrid;
+    // Create array of values 1 to n and shuffle it
+    const values = Array.from({ length: size }, (_, i) => i + 1)
+      .sort(() => Math.random() - 0.5);
+
+    for (const value of values) {
+      if (isValid(row, col, value)) {
+        grid[row][col] = value;
+        if (fillGrid(row, col + 1)) {
+          return true;
+        }
+        grid[row][col] = 0; // backtrack
+      }
+    }
+
+    return false;
+  };
+
+  // Try to fill the grid
+  return fillGrid(0, 0) ? grid : null;
 };
 
 /**
- * Create connected components using floodfill starting from cells with value 1
+ * Create connected components using floodfill
  */
 const createConnectedComponents = (
-  grid: number[][],
   size: number
 ): { componentGrid: number[][], componentSizes: Map<number, number> } => {
   // Initialize component grid with -1 (unassigned)
@@ -76,7 +89,7 @@ const createConnectedComponents = (
 
   // Keep trying until we get exactly n components of size n
   let attempts = 0;
-  const maxAttempts = 100; // Prevent infinite loops
+  const maxAttempts = 1000; // Increase max attempts since we have stricter constraints
 
   while (attempts < maxAttempts) {
     // Reset the grid and sizes
@@ -176,7 +189,7 @@ const createConnectedComponents = (
       }
     }
 
-    // If we successfully created n components of size n, we're done
+    // If we successfully created n components of size n, verify they're all connected
     if (success && componentSizes.size === size) {
       // Verify all components are connected
       const isConnected = (componentId: number): boolean => {
@@ -239,50 +252,98 @@ const createConnectedComponents = (
 
 // Generate a solved grid
 export const generateSolvedGrid = (size: number): CellState[][] => {
-  // Step 1: Generate a Latin square
-  const latinSquare = generateLatinSquare(size);
+  let attempts = 0;
+  const maxAttempts = 1000;
 
-  // Step 2: Create connected components using floodfill
-  const { componentGrid } = createConnectedComponents(latinSquare, size);
+  while (attempts < maxAttempts) {
+    try {
+      // Step 1: Create connected components
+      const { componentGrid } = createConnectedComponents(size);
 
-  // Step 3: Convert to CellState grid
-  const newGrid: CellState[][] = Array(size)
-    .fill(null)
-    .map((_, row) =>
-      Array(size)
-        .fill(null)
-        .map((_, col) => ({
-          value: latinSquare[row][col],
-          revealed: false,
-          isMine: false,
-          componentId: componentGrid[row][col],
-        }))
-    );
+      // Step 2: Generate a Latin square that respects component constraints
+      const latinSquare = generateLatinSquare(size, componentGrid);
 
-  // Step 4: Set mines (highest value in each component)
-  const componentHighestValues = new Map<number, { value: number; row: number; col: number }>();
-
-  // Find highest value in each component
-  for (let row = 0; row < size; row++) {
-    for (let col = 0; col < size; col++) {
-      const componentId = componentGrid[row][col];
-      const value = latinSquare[row][col];
-
-      if (
-        !componentHighestValues.has(componentId) ||
-        value > componentHighestValues.get(componentId)!.value
-      ) {
-        componentHighestValues.set(componentId, { value, row, col });
+      if (!latinSquare) {
+        attempts++;
+        continue;
       }
+
+      // Verify row and column sums
+      const expectedSum = (size * (size + 1)) / 2;
+      let validSums = true;
+
+      // Check row sums
+      for (let row = 0; row < size; row++) {
+        const sum = latinSquare[row].reduce((a, b) => a + b, 0);
+        if (sum !== expectedSum) {
+          validSums = false;
+          break;
+        }
+      }
+
+      // Check column sums
+      if (validSums) {
+        for (let col = 0; col < size; col++) {
+          let sum = 0;
+          for (let row = 0; row < size; row++) {
+            sum += latinSquare[row][col];
+          }
+          if (sum !== expectedSum) {
+            validSums = false;
+            break;
+          }
+        }
+      }
+
+      if (!validSums) {
+        attempts++;
+        continue;
+      }
+
+      // Step 3: Convert to CellState grid
+      const newGrid: CellState[][] = Array(size)
+        .fill(null)
+        .map((_, row) =>
+          Array(size)
+            .fill(null)
+            .map((_, col) => ({
+              value: latinSquare[row][col],
+              revealed: false,
+              isMine: false,
+              componentId: componentGrid[row][col],
+            }))
+        );
+
+      // Step 4: Set mines (highest value in each component)
+      const componentHighestValues = new Map<number, { value: number; row: number; col: number }>();
+
+      // Find highest value in each component
+      for (let row = 0; row < size; row++) {
+        for (let col = 0; col < size; col++) {
+          const componentId = componentGrid[row][col];
+          const value = latinSquare[row][col];
+
+          if (
+            !componentHighestValues.has(componentId) ||
+            value > componentHighestValues.get(componentId)!.value
+          ) {
+            componentHighestValues.set(componentId, { value, row, col });
+          }
+        }
+      }
+
+      // Set mines
+      for (const { row, col } of componentHighestValues.values()) {
+        newGrid[row][col].isMine = true;
+      }
+
+      return newGrid;
+    } catch {
+      attempts++;
     }
   }
 
-  // Set mines
-  for (const { row, col } of componentHighestValues.values()) {
-    newGrid[row][col].isMine = true;
-  }
-
-  return newGrid;
+  throw new Error(`Failed to generate a valid grid after ${maxAttempts} attempts`);
 };
 
 // Handle cell click and return updated grid and game state

@@ -13,13 +13,15 @@ import {
 } from "@/lib/sudoku-minesweeper"
 
 export default function SudokuMinesweeper() {
-  const [gridSize, setGridSize] = useState(5)
-  const [inputSize, setInputSize] = useState("5")
+  const initialGridSize = 5
+  const [gridSize, setGridSize] = useState(initialGridSize)
+  const [inputSize, setInputSize] = useState(initialGridSize.toString())
   const [grid, setGrid] = useState<CellState[][]>([])
   const [gameOver, setGameOver] = useState(false)
   const [gameWon, setGameWon] = useState(false)
   const [message, setMessage] = useState("")
 
+  const color = ["yellow", "blue", "green", "red", "orange", "pink", "teal", "gray"]
   // Initialize game
   const initializeGame = () => {
     const { size, message } = validateGridSize(inputSize);
@@ -95,7 +97,6 @@ export default function SudokuMinesweeper() {
         {grid.map((row, rowIndex) =>
           row.map((cell, colIndex) => {
             // Show component colors for all cells, revealed or not
-            const color = ["yellow", "blue", "green", "red", "purple"]
             const backgroundColor = color[cell.componentId]
 
             return (
