@@ -408,19 +408,3 @@ export const handleCellClick = (
 
   return { newGrid, gameOver: false, gameWon: false, message: "" };
 };
-
-// Validate and normalize grid size
-export const validateGridSize = (inputSize: string): {
-  size: number;
-  message: string;
-} => {
-  const size = Number.parseInt(inputSize) || 5;
-
-  if (size < 4) {
-    return { size: 4, message: "Minimum grid size is 4x4" };
-  } else if (size > 10) {
-    return { size: 10, message: "Maximum grid size is 10x10" };
-  }
-
-  return { size, message: "" };
-}; 

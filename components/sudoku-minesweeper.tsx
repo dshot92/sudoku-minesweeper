@@ -9,13 +9,11 @@ import {
   CellState,
   generateSolvedGrid,
   handleCellClick as handleCellClickLogic,
-  validateGridSize
 } from "@/lib/sudoku-minesweeper"
 
 export default function SudokuMinesweeper() {
-  const initialGridSize = 5
-  const [gridSize, setGridSize] = useState(initialGridSize)
-  const [inputSize, setInputSize] = useState(initialGridSize.toString())
+  const [gridSize, setGridSize] = useState(5)
+  const [inputSize, setInputSize] = useState("5")
   const [grid, setGrid] = useState<CellState[][]>([])
   const [gameOver, setGameOver] = useState(false)
   const [gameWon, setGameWon] = useState(false)
@@ -24,12 +22,14 @@ export default function SudokuMinesweeper() {
   const color = ["yellow", "blue", "green", "red", "orange", "pink", "teal", "gray"]
   // Initialize game
   const initializeGame = () => {
-    const { size, message } = validateGridSize(inputSize);
-    setGridSize(size);
-    setInputSize(size.toString());
-    setMessage(message);
+    let newSize = parseInt(inputSize) || 5;
+    // Clamp the size between 4 and 8
+    newSize = Math.max(4, Math.min(8, newSize));
+    setGridSize(newSize);
+    setInputSize(newSize.toString());
+    setMessage("");
 
-    const newGrid = generateSolvedGrid(size);
+    const newGrid = generateSolvedGrid(newSize);
     setGrid(newGrid);
     setGameOver(false);
     setGameWon(false);
@@ -70,7 +70,7 @@ export default function SudokuMinesweeper() {
             id="grid-size"
             type="number"
             min="4"
-            max="10"
+            max="8"
             value={inputSize}
             onChange={(e) => setInputSize(e.target.value)}
             className="w-20 bg-gray-800 text-white"
