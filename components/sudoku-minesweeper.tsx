@@ -7,7 +7,6 @@ import { RefreshCw } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   CellState,
-  generateRandomColor,
   generateSolvedGrid,
   handleCellClick as handleCellClickLogic,
   validateGridSize
