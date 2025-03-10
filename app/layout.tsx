@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Sudoku Minesweeper",
   description: "A unique blend of Sudoku and Minesweeper",
   manifest: "/manifest.json",
+  favicon: "/icons/icon-vignette.png",
   icons: {
     icon: '/icons/icon-vignette.png',
     apple: '/icons/icon-vignette.png',
@@ -35,6 +36,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <link rel="icon" href="/icons/icon-vignette.png" sizes="any" />
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
