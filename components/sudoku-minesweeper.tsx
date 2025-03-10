@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { RefreshCw } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -11,6 +10,7 @@ import {
   handleCellClick as handleCellClickLogic,
 } from "@/lib/sudoku-minesweeper"
 import Image from "next/image"
+import { ThemeToggle } from "./theme-toggle"
 
 export default function SudokuMinesweeper() {
   const [gridSize, setGridSize] = useState(5)
@@ -70,49 +70,48 @@ export default function SudokuMinesweeper() {
   }
 
   return (
-    <div className="flex flex-col max-w-2xl w-full mx-auto p-2">
-      <div className="m-4 flex flex-col sm:flex-row gap-4 items-center justify-center w-full">
-        <div className="flex items-center gap-2">
-          <label htmlFor="grid-size" className="whitespace-nowrap">
-            Grid Size:
-          </label>
-          <div className="flex items-center">
+    <div className="grid grid-cols-1 max-w-2xl w-full mx-auto px-2">
+      <div className="mb-4">
+        <div className="grid grid-cols-3 items-center w-full mb-2">
+          <div className="justify-self-start">
+            <Button onClick={handleSizeChange} className="flex items-center gap-2">
+              {/* <RefreshCw className="h-4 w-4" /> */}
+              New Game
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1 justify-center">
             <Button
-              variant="outline"
               onClick={() => {
                 const newSize = Math.max(4, parseInt(inputSize) - 1)
                 setInputSize(newSize.toString())
               }}
-              className="h-8 w-8 p-0"
             >
               -
             </Button>
-            <div
-              className="w-16 mx-1 bg-gray-800 text-white h-8 flex items-center justify-center"
-            >
-              {inputSize}
-            </div>
             <Button
-              variant="outline"
+            // variant="outline"
+            >
+              {inputSize + "x" + inputSize}
+            </Button>
+            <Button
               onClick={() => {
                 const newSize = Math.min(8, parseInt(inputSize) + 1)
                 setInputSize(newSize.toString())
               }}
-              className="h-8 w-8 p-0"
             >
               +
             </Button>
           </div>
-        </div>
 
-        <Button onClick={handleSizeChange} className="flex items-center gap-2">
-          <RefreshCw className="h-4 w-4" />
-          New Game
-        </Button>
+          <div className="justify-self-end">
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
 
       <div
-        className="grid gap-[1px] bg-gray-600 p-[1px] w-full text-black"
+        className="grid w-full text-black"
         style={{
           gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`
         }}
@@ -125,9 +124,8 @@ export default function SudokuMinesweeper() {
               <div
                 key={`${rowIndex}-${colIndex}`}
                 className={`
-                  flex items-center justify-center aspect-square w-full
+                  flex items-center justify-center aspect-square border
                   ${cell.revealed ? "text-black font-bold text-[min(8vw,4rem)]" : "cursor-pointer hover:opacity-90"}
-                  border border-gray-500
                 `}
                 style={{
                   backgroundColor: backgroundColor,
