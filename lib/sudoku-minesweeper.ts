@@ -384,6 +384,29 @@ export const handleCellClick = (
       message: "Game Over! You clicked on a mine."
     };
   } else {
+    // Check if all non-mine cells in this component are revealed
+    const componentId = cell.componentId;
+    let allNonMinesInComponentRevealed = true;
+    let minePosition: { row: number, col: number } | null = null;
+
+    // Find all cells in this component
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        if (newGrid[r][c].componentId === componentId) {
+          if (newGrid[r][c].isMine) {
+            minePosition = { row: r, col: c };
+          } else if (!newGrid[r][c].revealed) {
+            allNonMinesInComponentRevealed = false;
+          }
+        }
+      }
+    }
+
+    // If all non-mine cells in the component are revealed, reveal the mine too
+    if (allNonMinesInComponentRevealed && minePosition) {
+      newGrid[minePosition.row][minePosition.col].revealed = true;
+    }
+
     // Check if all non-mine cells are revealed (win condition)
     let allNonMinesRevealed = true;
     for (let r = 0; r < gridSize; r++) {

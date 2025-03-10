@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
@@ -18,6 +18,7 @@ export default function SudokuMinesweeper() {
   const [gameOver, setGameOver] = useState(false)
   const [gameWon, setGameWon] = useState(false)
   const [message, setMessage] = useState("")
+  const gridRef = useRef<CellState[][]>([])
 
   const color = [
     "#FFD700", // bright yellow
@@ -29,6 +30,7 @@ export default function SudokuMinesweeper() {
     "#20B2AA", // light sea green
     "#B8B8B8"  // medium gray
   ]
+
   // Initialize game
   const initializeGame = () => {
     let newSize = parseInt(inputSize) || 5;
@@ -40,16 +42,18 @@ export default function SudokuMinesweeper() {
 
     const newGrid = generateSolvedGrid(newSize);
     setGrid(newGrid);
+    gridRef.current = newGrid;
     setGameOver(false);
     setGameWon(false);
   }
 
   // Handle cell click
   const handleCellClick = (row: number, col: number) => {
-    if (gameOver || gameWon || grid[row][col].revealed) return;
+    if (gameOver || gameWon || gridRef.current[row][col].revealed) return;
 
-    const result = handleCellClickLogic(grid, row, col, gridSize);
+    const result = handleCellClickLogic(gridRef.current, row, col, gridSize);
     setGrid(result.newGrid);
+    gridRef.current = result.newGrid;
     setGameOver(result.gameOver);
     setGameWon(result.gameWon);
 
@@ -88,9 +92,7 @@ export default function SudokuMinesweeper() {
             >
               -
             </Button>
-            <Button
-            // variant="outline"
-            >
+            <Button>
               {inputSize + "x" + inputSize}
             </Button>
             <Button
