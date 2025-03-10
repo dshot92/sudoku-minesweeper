@@ -35,7 +35,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <link rel="icon" href="/icons/icon-vignette.png" sizes="any" />
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
