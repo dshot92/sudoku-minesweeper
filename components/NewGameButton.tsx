@@ -37,7 +37,11 @@ export default function NewGameButton() {
   };
 
   return (
-    <Button onClick={initializeGame} className="flex items-center gap-2 p-2 h-auto">
+    <Button
+      onClick={initializeGame}
+      className="flex items-center gap-2 p-2 h-auto"
+      aria-label={"New Game"}
+    >
       <div
         style={{
           width: '36px',
