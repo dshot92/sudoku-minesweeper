@@ -27,7 +27,7 @@ export default function LateralMenu() {
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 left-4 z-30 flex items-center gap-2 p-2 h-auto border-foreground"
+        className="z-30 flex items-center gap-2 p-2 h-auto border-foreground"
         aria-label="Open menu"
       >
         <div
