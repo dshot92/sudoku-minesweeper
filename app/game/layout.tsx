@@ -23,7 +23,7 @@ export default function GameLayout({
             </div>
           </div>
         </header>
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col px-2">
           <GameAlert />
           {children}
         </div>

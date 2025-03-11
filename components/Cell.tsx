@@ -1,33 +1,16 @@
+"use client"
+
 import { CellState } from "@/lib/sudoku-minesweeper"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 
-// Convert CSS variable to RGB
-const cssVarToRGB = (componentId: number) => {
-  const color = getComputedStyle(document.documentElement).getPropertyValue(`--component-color-${componentId}`).trim()
-  const hex = color.startsWith('#') ? color : `#${color}`
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
+// Move color conversion logic outside component
+const hexToRGB = (hex: string) => {
+  const h = hex.startsWith('#') ? hex : `#${hex}`
+  const r = parseInt(h.slice(1, 3), 16)
+  const g = parseInt(h.slice(3, 5), 16)
+  const b = parseInt(h.slice(5, 7), 16)
   return { r, g, b }
-}
-
-// Create a muted version of a color based on the current theme
-const getMutedColor = (componentId: number) => {
-  const { r, g, b } = cssVarToRGB(componentId)
-  const isDarkMode = document.documentElement.classList.contains('dark')
-
-  // In dark mode, mix with black; in light mode, mix with white
-  const muteFactor = 0.8
-  if (isDarkMode) {
-    const mutedR = Math.round(r * (1 - muteFactor))
-    const mutedG = Math.round(g * (1 - muteFactor))
-    const mutedB = Math.round(b * (1 - muteFactor))
-    return `rgb(${mutedR}, ${mutedG}, ${mutedB})`
-  } else {
-    const mutedR = Math.round(r + (255 - r) * muteFactor)
-    const mutedG = Math.round(g + (255 - g) * muteFactor)
-    const mutedB = Math.round(b + (255 - b) * muteFactor)
-    return `rgb(${mutedR}, ${mutedG}, ${mutedB})`
-  }
 }
 
 interface CellProps {
@@ -37,8 +20,36 @@ interface CellProps {
 }
 
 export function Cell({ cell, onClick, gridSize }: CellProps) {
-  const originalColor = `var(--component-color-${cell.componentId})`
-  const mutedColor = getMutedColor(cell.componentId)
+  const { theme } = useTheme()
+  const [mutedColor, setMutedColor] = useState('')
+  const [originalColor, setOriginalColor] = useState('')
+
+  useEffect(() => {
+    // Get the CSS variable value
+    const color = getComputedStyle(document.documentElement)
+      .getPropertyValue(`--component-color-${cell.componentId}`)
+      .trim()
+
+    const { r, g, b } = hexToRGB(color)
+    const isDark = theme === 'dark'
+
+    // Calculate muted color based on theme
+    const muteFactor = 0.8
+    const mutedRGB = isDark
+      ? {
+        r: Math.round(r * (1 - muteFactor)),
+        g: Math.round(g * (1 - muteFactor)),
+        b: Math.round(b * (1 - muteFactor))
+      }
+      : {
+        r: Math.round(r + (255 - r) * muteFactor),
+        g: Math.round(g + (255 - g) * muteFactor),
+        b: Math.round(b + (255 - b) * muteFactor)
+      }
+
+    setOriginalColor(`var(--component-color-${cell.componentId})`)
+    setMutedColor(`rgb(${mutedRGB.r}, ${mutedRGB.g}, ${mutedRGB.b})`)
+  }, [cell.componentId, theme]) // Re-calculate when theme changes
 
   return (
     <div
