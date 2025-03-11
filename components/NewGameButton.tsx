@@ -15,6 +15,18 @@ export default function NewGameButton() {
     initializeGame();
   }, []);
 
+  // Add keyboard event handler
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'r' || event.key === 'R' || event.key === 'F2') {
+        initializeGame();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [initializeGame]);
+
   return (
     <Button onClick={initializeGame} className="flex items-center gap-2 p-2 h-auto">
       <div className={theme === 'light' ? 'invert-[1]' : ''}>
