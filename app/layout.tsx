@@ -11,9 +11,7 @@ export const metadata: Metadata = {
   description: "A unique blend of Sudoku and Minesweeper",
   manifest: "/manifest.json",
   icons: {
-    icon: '/icons/favicon.ico',
-    apple: '/icons/favicon.ico',
-    shortcut: '/icons/favicon.ico',
+    icon: '/icons/icon-blue.ico',
   },
   appleWebApp: {
     capable: true,
