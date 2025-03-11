@@ -75,7 +75,6 @@ function SelectContent({
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport
           className={cn(
-            "p-2",
             position === "popper" &&
             "h-[var(--radix-select-trigger-height)] w-full scroll-my-2"
           )}
@@ -110,8 +109,8 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-sm py-2.5 pr-8 pl-3 text-base outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
-        "even:bg-foreground even:text-background odd:bg-background odd:text-foreground",
+        "relative flex w-full cursor-default items-center gap-2 py-2.5 pr-8 pl-3 text-base outline-none select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2",
+        "even:bg-background even:text-foreground odd:bg-foreground odd:text-background",
         "even:data-[row-type=even]:true odd:data-[row-type=odd]:true",
         className
       )}
