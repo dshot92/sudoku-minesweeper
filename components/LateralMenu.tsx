@@ -5,33 +5,34 @@ import Link from 'next/link';
 import { ThemeToggle } from './theme-toggle';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Menu, X } from "lucide-react";
+
 export default function LateralMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { gridSize, setGridSize } = useSettings();
 
+  const handleGridSizeChange = (value: string) => {
+    setGridSize(parseInt(value));
+  };
+
   return (
     <>
-      <button
+      <Button
+        variant="ghost"
+        size="icon"
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 left-4 z-30 p-2 rounded-lg hover:bg-secondary/80"
+        className="fixed top-4 left-4 z-30"
         aria-label="Open menu"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="18" x2="21" y2="18" />
-        </svg>
-      </button>
+        <Menu className="h-6 w-6" />
+      </Button>
 
       {/* Backdrop */}
       {isOpen && (
@@ -50,24 +51,21 @@ export default function LateralMenu() {
           <div className="flex justify-between items-center mb-8">
             <ThemeToggle />
             <Button
+              variant="ghost"
+              className="justify-start"
+              asChild
+            >
+              <Link href="/" onClick={() => setIsOpen(false)}>
+                Home
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsOpen(false)}
-              className="p-2 rounded-lg hover:bg-secondary/80"
               aria-label="Close menu"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X className="h-6 w-6" />
             </Button>
           </div>
 
@@ -75,52 +73,45 @@ export default function LateralMenu() {
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">Game Modes</h3>
               <nav className="space-y-2">
-                <Link
-                  href="/"
-                  className="block px-2 py-1 rounded-lg hover:bg-secondary/80"
-                  onClick={() => setIsOpen(false)}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  asChild
                 >
-                  Home
-                </Link>
-                <Link
-                  href="/game/zen"
-                  className="block px-2 py-1 rounded-lg hover:bg-secondary/80"
-                  onClick={() => setIsOpen(false)}
+                  <Link href="/game/zen" onClick={() => setIsOpen(false)}>
+                    Zen Mode
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start"
+                  asChild
                 >
-                  Zen Mode
-                </Link>
-                <Link
-                  href="/game/classic"
-                  className="block px-2 py-1 rounded-lg hover:bg-secondary/80"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Classic Mode
-                </Link>
+                  <Link href="/game/classic" onClick={() => setIsOpen(false)}>
+                    Classic Mode
+                  </Link>
+                </Button>
               </nav>
             </div>
 
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">Settings</h3>
               <div className="space-y-4">
-                <div>
-                  <label className="text-sm block mb-1">Grid Size</label>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setGridSize(Math.max(3, gridSize - 1))}
-                      className="p-2 rounded-lg border bg-background hover:bg-secondary/80"
-                    >
-                      -
-                    </button>
-                    <span className="flex-1 text-center">{gridSize}x{gridSize}</span>
-                    <button
-                      onClick={() => setGridSize(Math.min(7, gridSize + 1))}
-                      className="p-2 rounded-lg border bg-background hover:bg-secondary/80"
-                    >
-                      +
-                    </button>
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Grid Size</label>
+                  <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select grid size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[3, 4, 5, 6, 7].map((size) => (
+                        <SelectItem key={size} value={size.toString()}>
+                          {size} x {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-
               </div>
             </div>
           </div>
