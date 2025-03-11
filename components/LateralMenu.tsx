@@ -25,13 +25,22 @@ export default function LateralMenu() {
   return (
     <>
       <Button
-        variant="ghost"
-        size="icon"
+        variant="outline"
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 left-4 z-30"
+        className="fixed top-4 left-4 z-30 flex items-center gap-2 p-2 h-auto border-foreground"
         aria-label="Open menu"
       >
-        <Menu className="h-6 w-6" />
+        <div
+          style={{
+            width: '42px',
+            height: '42px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Menu size={42} strokeWidth={3} />
+        </div>
       </Button>
 
       {/* Backdrop */}
@@ -51,8 +60,8 @@ export default function LateralMenu() {
           <div className="flex justify-between items-center mb-8">
             <ThemeToggle />
             <Button
-              variant="ghost"
-              className="justify-start"
+              variant="outline"
+              className="justify-start border-foreground"
               asChild
             >
               <Link href="/" onClick={() => setIsOpen(false)}>
@@ -60,8 +69,8 @@ export default function LateralMenu() {
               </Link>
             </Button>
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              className="justify-start border-foreground"
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
             >
@@ -70,12 +79,13 @@ export default function LateralMenu() {
           </div>
 
           <div className="space-y-6">
+
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">Game Modes</h3>
               <nav className="space-y-2">
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start"
+                  variant="outline"
+                  className="w-full justify-start border-foreground"
                   asChild
                 >
                   <Link href="/game/zen" onClick={() => setIsOpen(false)}>
@@ -83,8 +93,8 @@ export default function LateralMenu() {
                   </Link>
                 </Button>
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start"
+                  variant="outline"
+                  className="w-full justify-start border-foreground"
                   asChild
                 >
                   <Link href="/game/classic" onClick={() => setIsOpen(false)}>
@@ -95,24 +105,19 @@ export default function LateralMenu() {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground">Settings</h3>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Grid Size</label>
-                  <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select grid size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[3, 4, 5, 6, 7].map((size) => (
-                        <SelectItem key={size} value={size.toString()}>
-                          {size} x {size}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <h3 className="text-sm font-semibold text-muted-foreground">Grid Size</h3>
+              <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
+                <SelectTrigger className="w-full border-foreground">
+                  <SelectValue placeholder="Select grid size" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[3, 4, 5, 6, 7].map((size) => (
+                    <SelectItem key={size} value={size.toString()}>
+                      {size} x {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
