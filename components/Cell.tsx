@@ -1,14 +1,14 @@
 import { CellState } from "@/lib/sudoku-minesweeper"
 
 const COLORS = [
-  "#FFD700", // bright yellow
-  "#87CEEB", // sky blue
-  "#90EE90", // light green
-  "#FF3333", // bright red
-  "#FF6B2B", // bright orange
-  "#FFB6C1", // light pink
-  "#20B2AA", // light sea green
-  "#B8B8B8"  // medium gray
+  "#FFBE0B", // bright yellow
+  "#FF006E", // bright pink
+  "#00F5D4", // turquoise
+  "#8338EC", // purple
+  "#49BB76", // green
+  "#3A86FF", // blue
+  "#FB5607", // vivid orange
+  "#845EC2"  // muted purple
 ]
 
 // Convert hex to RGB
