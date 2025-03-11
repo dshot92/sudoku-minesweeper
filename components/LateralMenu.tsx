@@ -106,7 +106,7 @@ export default function LateralMenu() {
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground">Grid Size</h3>
               <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
-                <SelectTrigger className="w-full border-foreground min-h-[48px]">
+                <SelectTrigger className="w-full border-foreground min-h-[48px] group">
                   <SelectValue placeholder="Select grid size" />
                 </SelectTrigger>
                 <SelectContent>

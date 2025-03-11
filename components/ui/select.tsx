@@ -40,9 +40,10 @@ function SelectTrigger({
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-5 opacity-50" />
-      </SelectPrimitive.Icon>
+      <ChevronDownIcon
+        className="size-5 text-foreground transition-transform duration-200 group-data-[state=open]:rotate-180"
+        aria-hidden="true"
+      />
     </SelectPrimitive.Trigger>
   )
 }
@@ -58,7 +59,12 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          "bg-popover text-foreground border-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-96 min-w-[8rem] overflow-hidden border shadow-md",
+          "bg-popover text-foreground border-foreground relative z-50 max-h-96 min-w-[8rem] overflow-hidden border shadow-md",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out",
+          "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+          "data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-top-2",
+          "data-[state=closed]:duration-100 data-[state=open]:duration-200",
+          "transition-all ease-in-out",
           position === "popper" &&
           "data-[side=bottom]:translate-y-[-1px] data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1 rounded-b-md border-t-0 w-[var(--radix-select-trigger-width)]",
           className
@@ -165,7 +171,7 @@ function SelectScrollDownButton({
       )}
       {...props}
     >
-      <ChevronDownIcon className="size-4" />
+      <ChevronUpIcon className="size-4" />
     </SelectPrimitive.ScrollDownButton>
   )
 }
