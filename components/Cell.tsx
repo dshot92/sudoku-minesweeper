@@ -60,7 +60,18 @@ export function Cell({ cell, onClick, gridSize }: CellProps) {
             }}
           />
         ) : (
-          <span style={{ color: originalColor }}>
+          <span
+            style={{
+              color: originalColor,
+              fontSize: '42px',
+              lineHeight: '42px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '42px',
+              height: '42px'
+            }}
+          >
             {cell.value}
           </span>
         )
