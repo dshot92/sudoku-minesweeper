@@ -8,67 +8,8 @@ import {
   generateSolvedGrid,
   handleCellClick as handleCellClickLogic,
 } from "@/lib/sudoku-minesweeper"
-import Image from "next/image"
 import { ThemeToggle } from "./theme-toggle"
-
-const color = [
-  "#FFD700", // bright yellow
-  "#87CEEB", // sky blue
-  "#90EE90", // light green
-  "#FF3333", // bright red
-  "#FF6B2B", // bright orange
-  "#FFB6C1", // light pink
-  "#20B2AA", // light sea green
-  "#B8B8B8"  // medium gray
-]
-
-// Convert hex to RGB
-const hexToRGB = (hex: string) => {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return { r, g, b }
-}
-
-// Create a muted version of a color
-const getMutedColor = (hex: string) => {
-  const { r, g, b } = hexToRGB(hex)
-  // Mix with white to create a muted version
-  const muteFactor = 0.8
-  const mutedR = Math.round(r + (255 - r) * muteFactor)
-  const mutedG = Math.round(g + (255 - g) * muteFactor)
-  const mutedB = Math.round(b + (255 - b) * muteFactor)
-  return `rgb(${mutedR}, ${mutedG}, ${mutedB})`
-}
-
-// Convert RGB to HSL to get hue
-const rgbToHue = (r: number, g: number, b: number): number => {
-  r /= 255;
-  g /= 255;
-  b /= 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0;
-
-  if (max === min) {
-    return 0; // achromatic
-  }
-
-  const d = max - min;
-  switch (max) {
-    case r:
-      h = (g - b) / d + (g < b ? 6 : 0);
-      break;
-    case g:
-      h = (b - r) / d + 2;
-      break;
-    case b:
-      h = (r - g) / d + 4;
-      break;
-  }
-
-  return h * 60;
-}
+import { Cell } from "./Cell"
 
 export default function SudokuMinesweeper() {
   const [gridSize, setGridSize] = useState(5)
@@ -164,37 +105,14 @@ export default function SudokuMinesweeper() {
         }}
       >
         {grid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => {
-            const originalColor = color[cell.componentId]
-            const backgroundColor = cell.revealed ? getMutedColor(originalColor) : originalColor
-
-            return (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={"flex items-center justify-center aspect-square border transition-colors duration-200"}
-                style={{
-                  backgroundColor,
-                }}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-              >
-                {cell.revealed && (
-                  cell.value === gridSize ? (
-                    <div style={{
-                      width: '42px',
-                      height: '42px',
-                      WebkitMask: 'url("/mine.svg") center/contain no-repeat',
-                      mask: 'url("/mine.svg") center/contain no-repeat',
-                      backgroundColor: originalColor
-                    }} />
-                  ) : (
-                    <span style={{ color: originalColor }}>
-                      {cell.value}
-                    </span>
-                  )
-                )}
-              </div>
-            )
-          }),
+          row.map((cell, colIndex) => (
+            <Cell
+              key={`${rowIndex}-${colIndex}`}
+              cell={cell}
+              onClick={() => handleCellClick(rowIndex, colIndex)}
+              gridSize={gridSize}
+            />
+          )),
         )}
       </div>
 
