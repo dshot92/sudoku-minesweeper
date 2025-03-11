@@ -13,7 +13,7 @@ import {
 import { Cell } from "./Cell"
 import { useSettings } from "@/contexts/SettingsContext"
 
-export default function SudokuMinesweeper() {
+export default function Grid() {
   const { theme } = useTheme()
   const { gridSize } = useSettings()
   const [grid, setGrid] = useState<CellState[][]>([])

@@ -1,4 +1,4 @@
-import SudokuMinesweeper from "@/components/sudoku-minesweeper";
+import SudokuMinesweeper from "@/components/Grid";
 
 export default function Home() {
   return (
