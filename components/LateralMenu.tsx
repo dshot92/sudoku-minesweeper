@@ -70,22 +70,21 @@ export default function LateralMenu() {
             </Button>
             <Button
               variant="outline"
-              className="justify-start border-foreground"
+              className="justify-start border-foreground p-3 h-auto min-h-[48px] min-w-[48px]"
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
             >
-              <X className="h-6 w-6" />
+              <X className="h-8 w-8" />
             </Button>
           </div>
 
           <div className="space-y-6">
-
-            <div className="space-y-2">
+            <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground">Game Modes</h3>
-              <nav className="space-y-2">
+              <nav className="space-y-4">
                 <Button
                   variant="outline"
-                  className="w-full justify-start border-foreground"
+                  className="w-full justify-start border-foreground py-4 h-auto min-h-[48px] text-base"
                   asChild
                 >
                   <Link href="/game/zen" onClick={() => setIsOpen(false)}>
@@ -94,7 +93,7 @@ export default function LateralMenu() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full justify-start border-foreground"
+                  className="w-full justify-start border-foreground py-4 h-auto min-h-[48px] text-base"
                   asChild
                 >
                   <Link href="/game/classic" onClick={() => setIsOpen(false)}>
@@ -104,15 +103,19 @@ export default function LateralMenu() {
               </nav>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground">Grid Size</h3>
               <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
-                <SelectTrigger className="w-full border-foreground">
+                <SelectTrigger className="w-full border-foreground min-h-[48px]">
                   <SelectValue placeholder="Select grid size" />
                 </SelectTrigger>
                 <SelectContent>
                   {[3, 4, 5, 6, 7].map((size) => (
-                    <SelectItem key={size} value={size.toString()}>
+                    <SelectItem
+                      key={size}
+                      value={size.toString()}
+                      className="min-h-[40px]"
+                    >
                       {size} x {size}
                     </SelectItem>
                   ))}
