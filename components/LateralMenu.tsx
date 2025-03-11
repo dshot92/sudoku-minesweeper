@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ThemeToggle } from './theme-toggle';
 import { useSettings } from '@/contexts/SettingsContext';
-
+import { Button } from '@/components/ui/button';
 export default function LateralMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { gridSize, setGridSize } = useSettings();
@@ -48,8 +48,8 @@ export default function LateralMenu() {
       >
         <div className="p-4">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-xl font-bold">Menu</h2>
-            <button
+            <ThemeToggle />
+            <Button
               onClick={() => setIsOpen(false)}
               className="p-2 rounded-lg hover:bg-secondary/80"
               aria-label="Close menu"
@@ -68,7 +68,7 @@ export default function LateralMenu() {
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </button>
+            </Button>
           </div>
 
           <div className="space-y-6">
@@ -120,10 +120,7 @@ export default function LateralMenu() {
                     </button>
                   </div>
                 </div>
-                <div>
-                  <label className="text-sm block mb-1">Theme</label>
-                  <ThemeToggle />
-                </div>
+
               </div>
             </div>
           </div>
