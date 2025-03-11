@@ -27,7 +27,7 @@ export default function LateralMenu() {
       <Button
         variant="outline"
         onClick={() => setIsOpen(true)}
-        className="z-30 flex items-center gap-2 p-2 h-auto border-foreground"
+        className="z-30 flex p-2 h-auto border-foreground"
         aria-label="Open menu"
       >
         <div
@@ -46,7 +46,7 @@ export default function LateralMenu() {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
+          className="fixed inset-0 backdrop-blur-sm z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -70,11 +70,11 @@ export default function LateralMenu() {
             </Button>
             <Button
               variant="outline"
-              className="justify-start border-foreground p-3 h-auto min-h-[48px] min-w-[48px]"
+              className="justify-center border-foreground w-12 h-12 p-2"
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
             >
-              <X className="h-8 w-8" />
+              <X className="h-5 w-5" />
             </Button>
           </div>
 
@@ -114,7 +114,7 @@ export default function LateralMenu() {
                     <SelectItem
                       key={size}
                       value={size.toString()}
-                      className="min-h-[40px]"
+                      className="min-h-[42px]"
                     >
                       {size} x {size}
                     </SelectItem>
