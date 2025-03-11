@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CellState, generateSolvedGrid } from '@/lib/sudoku-minesweeper';
 import { useSettings } from './SettingsContext';
 
@@ -24,6 +24,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    initializeGame();
+  }, [gridSize]);
 
   const initializeGame = () => {
     setMessage("");
