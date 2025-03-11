@@ -32,8 +32,8 @@ export default function LateralMenu() {
       >
         <div
           style={{
-            width: '42px',
-            height: '42px',
+            width: '36px',
+            height: '36px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -84,7 +84,7 @@ export default function LateralMenu() {
               <nav className="space-y-4">
                 <Button
                   variant="outline"
-                  className="w-full justify-start border-foreground py-4 h-auto min-h-[48px] text-base"
+                  className="w-full justify-start border-foreground py-4 h-auto min-h-[42px] text-base"
                   asChild
                 >
                   <Link href="/game/zen" onClick={() => setIsOpen(false)}>
@@ -93,7 +93,7 @@ export default function LateralMenu() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full justify-start border-foreground py-4 h-auto min-h-[48px] text-base"
+                  className="w-full justify-start border-foreground py-4 h-auto min-h-[42px] text-base"
                   asChild
                 >
                   <Link href="/game/classic" onClick={() => setIsOpen(false)}>
@@ -106,7 +106,7 @@ export default function LateralMenu() {
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground">Grid Size</h3>
               <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
-                <SelectTrigger className="w-full border-foreground min-h-[48px] group">
+                <SelectTrigger className="w-full border-foreground min-h-[42px] group">
                   <SelectValue placeholder="Select grid size" />
                 </SelectTrigger>
                 <SelectContent>

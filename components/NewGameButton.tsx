@@ -40,8 +40,8 @@ export default function NewGameButton() {
     <Button onClick={initializeGame} className="flex items-center gap-2 p-2 h-auto">
       <div
         style={{
-          width: '42px',
-          height: '42px',
+          width: '36px',
+          height: '36px',
           WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
           mask: `url(${getButtonIcon()}) center/contain no-repeat`,
           backgroundColor: 'var(--foreground)',

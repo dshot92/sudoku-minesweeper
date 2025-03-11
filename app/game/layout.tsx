@@ -23,8 +23,10 @@ export default function GameLayout({
             </div>
           </div>
         </header>
-        {children}
-        <GameAlert />
+        <div className="flex-1 flex flex-col">
+          <GameAlert />
+          {children}
+        </div>
       </div>
     </GameProvider>
   );
