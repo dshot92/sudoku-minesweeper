@@ -1,12 +1,16 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
 import { useGame } from "@/contexts/GameContext";
 import { useEffect } from "react";
 
+const BUTTON_ICONS = {
+  LOST: "/game-button/lost.svg",
+  WIN: "/game-button/win.svg",
+  NEW: "/game-button/new.svg",
+} as const;
+
 export default function NewGameButton() {
-  const { theme } = useTheme();
   const { gameOver, gameWon, initializeGame } = useGame();
 
   // Initialize game on first render
@@ -26,14 +30,20 @@ export default function NewGameButton() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [initializeGame]);
 
+  const getButtonIcon = () => {
+    if (gameOver) return BUTTON_ICONS.LOST;
+    if (gameWon) return BUTTON_ICONS.WIN;
+    return BUTTON_ICONS.NEW;
+  };
+
   return (
     <Button onClick={initializeGame} className="flex items-center gap-2 p-2 h-auto">
       <div
         style={{
-          width: '32px',
-          height: '32px',
-          WebkitMask: `url(${gameOver ? "/game-button/lost.svg" : gameWon ? "/game-button/win.svg" : "/game-button/new.svg"}) center/contain no-repeat`,
-          mask: `url(${gameOver ? "/game-button/lost.svg" : gameWon ? "/game-button/win.svg" : "/game-button/new.svg"}) center/contain no-repeat`,
+          width: '42px',
+          height: '42px',
+          WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
+          mask: `url(${getButtonIcon()}) center/contain no-repeat`,
           backgroundColor: 'var(--foreground)',
           background: 'var(--background)'
         }}
