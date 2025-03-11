@@ -33,7 +33,7 @@ export default function Grid() {
   }
 
   return (
-    <div className="grid grid-cols-1 max-w-2xl w-full mx-auto">
+    <div className="grid grid-cols-1 max-w-2xl w-full mx-auto select-none">
       <div
         className="grid w-full aspect-square max-w-[80vh] mx-auto text-black font-bold text-6xl"
         style={{
