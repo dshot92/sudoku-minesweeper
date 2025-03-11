@@ -48,8 +48,8 @@ export default function NewGameButton() {
           height: '36px',
           WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
           mask: `url(${getButtonIcon()}) center/contain no-repeat`,
-          backgroundColor: 'var(--foreground)',
-          background: 'var(--background)'
+          backgroundColor: 'var(--background)',
+          background: 'var(--foreground)'
         }}
       />
     </Button>
