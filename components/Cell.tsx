@@ -42,7 +42,7 @@ export function Cell({ cell, onClick, gridSize }: CellProps) {
 
   return (
     <div
-      className="flex items-center justify-center aspect-square border transition-colors duration-200"
+      className="flex items-center justify-center rounded-sm border border-background aspect-square transition-colors duration-200"
       style={{
         backgroundColor: cell.revealed ? mutedColor : originalColor,
       }}
