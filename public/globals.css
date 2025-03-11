@@ -23,6 +23,16 @@
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --radius: 0.625rem;
+  
+  /* Component Colors */
+  --component-color-0: #FFBE0B;
+  --component-color-1: #FF006E;
+  --component-color-2: #00F5D4;
+  --component-color-3: #8338EC;
+  --component-color-4: #49BB76;
+  --component-color-5: #3A86FF;
+  --component-color-6: #FB5607;
+  --component-color-7: #845EC2;
 }
 
 .dark {

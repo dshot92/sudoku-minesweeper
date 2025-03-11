@@ -1,33 +1,33 @@
 import { CellState } from "@/lib/sudoku-minesweeper"
 
-const COLORS = [
-  "#FFBE0B", // bright yellow
-  "#FF006E", // bright pink
-  "#00F5D4", // turquoise
-  "#8338EC", // purple
-  "#49BB76", // green
-  "#3A86FF", // blue
-  "#FB5607", // vivid orange
-  "#845EC2"  // muted purple
-]
-
-// Convert hex to RGB
-const hexToRGB = (hex: string) => {
+// Convert CSS variable to RGB
+const cssVarToRGB = (componentId: number) => {
+  const color = getComputedStyle(document.documentElement).getPropertyValue(`--component-color-${componentId}`).trim()
+  const hex = color.startsWith('#') ? color : `#${color}`
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
   return { r, g, b }
 }
 
-// Create a muted version of a color
-const getMutedColor = (hex: string) => {
-  const { r, g, b } = hexToRGB(hex)
-  // Mix with white to create a muted version
+// Create a muted version of a color based on the current theme
+const getMutedColor = (componentId: number) => {
+  const { r, g, b } = cssVarToRGB(componentId)
+  const isDarkMode = document.documentElement.classList.contains('dark')
+
+  // In dark mode, mix with black; in light mode, mix with white
   const muteFactor = 0.8
-  const mutedR = Math.round(r + (255 - r) * muteFactor)
-  const mutedG = Math.round(g + (255 - g) * muteFactor)
-  const mutedB = Math.round(b + (255 - b) * muteFactor)
-  return `rgb(${mutedR}, ${mutedG}, ${mutedB})`
+  if (isDarkMode) {
+    const mutedR = Math.round(r * (1 - muteFactor))
+    const mutedG = Math.round(g * (1 - muteFactor))
+    const mutedB = Math.round(b * (1 - muteFactor))
+    return `rgb(${mutedR}, ${mutedG}, ${mutedB})`
+  } else {
+    const mutedR = Math.round(r + (255 - r) * muteFactor)
+    const mutedG = Math.round(g + (255 - g) * muteFactor)
+    const mutedB = Math.round(b + (255 - b) * muteFactor)
+    return `rgb(${mutedR}, ${mutedG}, ${mutedB})`
+  }
 }
 
 interface CellProps {
@@ -37,8 +37,8 @@ interface CellProps {
 }
 
 export function Cell({ cell, onClick, gridSize }: CellProps) {
-  const originalColor = COLORS[cell.componentId]
-  const mutedColor = getMutedColor(originalColor)
+  const originalColor = `var(--component-color-${cell.componentId})`
+  const mutedColor = getMutedColor(cell.componentId)
 
   return (
     <div
