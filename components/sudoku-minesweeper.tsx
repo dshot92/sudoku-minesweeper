@@ -23,8 +23,8 @@ export default function SudokuMinesweeper() {
     "#FFD700", // bright yellow
     "#87CEEB", // sky blue
     "#90EE90", // light green
-    "#FF9999", // vivid pink-red
-    "#FFA07A", // light salmon
+    "#FF3333", // bright red (changed from bright purple)
+    "#FF6B2B", // bright orange
     "#FFB6C1", // light pink
     "#20B2AA", // light sea green
     "#B8B8B8"  // medium gray
