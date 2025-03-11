@@ -1,6 +1,5 @@
 "use client"
 
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { handleCellClick as handleCellClickLogic } from "@/lib/sudoku-minesweeper"
 import { Cell } from "./Cell"
 import { useSettings } from "@/contexts/SettingsContext"
@@ -34,9 +33,9 @@ export default function Grid() {
   }
 
   return (
-    <div className="grid grid-cols-1 max-w-2xl w-full mx-auto px-2">
+    <div className="grid grid-cols-1 max-w-2xl w-full mx-auto">
       <div
-        className="grid w-full mb-4 aspect-square max-w-[80vh] mx-auto text-black font-bold text-6xl"
+        className="grid w-full aspect-square max-w-[80vh] mx-auto text-black font-bold text-6xl"
         style={{
           gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
         }}
@@ -52,12 +51,6 @@ export default function Grid() {
           ))
         )}
       </div>
-
-      {message && (
-        <Alert>
-          <AlertDescription>{message}</AlertDescription>
-        </Alert>
-      )}
     </div>
   )
 }
