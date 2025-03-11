@@ -58,7 +58,14 @@ export default function LateralMenu() {
       >
         <div className="p-4">
           <div className="flex justify-between items-center mb-8">
-            <ThemeToggle />
+            <Button
+              variant="outline"
+              className="justify-center border-foreground w-12 h-12 p-2"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </Button>
             <Button
               variant="outline"
               className="justify-start border-foreground"
@@ -68,14 +75,7 @@ export default function LateralMenu() {
                 Home
               </Link>
             </Button>
-            <Button
-              variant="outline"
-              className="justify-center border-foreground w-12 h-12 p-2"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close menu"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <ThemeToggle />
           </div>
 
           <div className="space-y-6">
