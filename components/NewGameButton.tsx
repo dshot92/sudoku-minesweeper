@@ -16,7 +16,7 @@ export default function NewGameButton() {
   // Initialize game on first render
   useEffect(() => {
     initializeGame();
-  }, []);
+  }, [initializeGame]);
 
   // Add keyboard event handler
   useEffect(() => {

@@ -4,6 +4,7 @@ import { handleCellClick as handleCellClickLogic } from "@/lib/sudoku-minesweepe
 import { Cell } from "./Cell"
 import { useSettings } from "@/contexts/SettingsContext"
 import { useGame } from "@/contexts/GameContext"
+import { useCallback } from 'react'
 
 export default function Grid() {
   const { gridSize } = useSettings()
@@ -11,15 +12,13 @@ export default function Grid() {
     grid,
     gameOver,
     gameWon,
-    message,
     setGrid,
     setGameOver,
     setGameWon,
     setMessage
   } = useGame()
 
-  // Handle cell click
-  const handleCellClick = (row: number, col: number) => {
+  const handleCellClick = useCallback((row: number, col: number) => {
     if (gameOver || gameWon || grid[row][col].revealed) return
 
     const result = handleCellClickLogic(grid, row, col, gridSize)
@@ -30,7 +29,7 @@ export default function Grid() {
     if (result.message) {
       setMessage(result.message)
     }
-  }
+  }, [gameOver, gameWon, grid, gridSize, setGameOver, setGameWon, setGrid, setMessage])
 
   return (
     <div className="grid grid-cols-1 max-w-2xl w-full mx-auto select-none">

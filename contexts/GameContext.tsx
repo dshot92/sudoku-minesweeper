@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { CellState, generateSolvedGrid } from '@/lib/sudoku-minesweeper';
 import { useSettings } from './SettingsContext';
 
@@ -25,17 +25,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [gameWon, setGameWon] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    initializeGame();
-  }, [gridSize]);
-
-  const initializeGame = () => {
+  const initializeGame = useCallback(() => {
     setMessage("");
     const newGrid = generateSolvedGrid(gridSize);
     setGrid(newGrid);
     setGameOver(false);
     setGameWon(false);
-  };
+  }, [gridSize]);
+
+  useEffect(() => {
+    initializeGame();
+  }, [initializeGame]);
 
   return (
     <GameContext.Provider
