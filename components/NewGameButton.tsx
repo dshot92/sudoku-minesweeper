@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { useTheme } from "next-themes";
 import { useGame } from "@/contexts/GameContext";
 import { useEffect } from "react";
@@ -29,15 +28,16 @@ export default function NewGameButton() {
 
   return (
     <Button onClick={initializeGame} className="flex items-center gap-2 p-2 h-auto">
-      <div className={theme === 'light' ? 'invert-[1]' : ''}>
-        <Image
-          src={gameOver ? "/game-button/lost.svg" : gameWon ? "/game-button/win.svg" : "/game-button/new.svg"}
-          alt={gameOver ? "Game Over" : gameWon ? "You Won!" : "New Game"}
-          width={32}
-          height={32}
-          priority
-        />
-      </div>
+      <div
+        style={{
+          width: '32px',
+          height: '32px',
+          WebkitMask: `url(${gameOver ? "/game-button/lost.svg" : gameWon ? "/game-button/win.svg" : "/game-button/new.svg"}) center/contain no-repeat`,
+          mask: `url(${gameOver ? "/game-button/lost.svg" : gameWon ? "/game-button/win.svg" : "/game-button/new.svg"}) center/contain no-repeat`,
+          backgroundColor: 'var(--foreground)',
+          background: 'var(--background)'
+        }}
+      />
     </Button>
   );
 } 
