@@ -126,13 +126,62 @@ export function GameProvider({ children }: { children: ReactNode }) {
     // Then set the game mode
     setGameMode(mode);
 
-    // Instead of using setTimeout, we'll handle the grid size change and game initialization
-    // in a more predictable way by doing it directly after setting the mode
-    if (mode === 'classic') {
-      // Only reset to smallest grid size when first entering classic mode
-      // or coming from another mode, not when already in classic
-      const classicSize = gameMode === 'classic' ? classicGridSize : GRID_PROGRESSION[0];
+    // For zen mode, we still want to automatically initialize a new game
+    if (mode === 'zen') {
+      // Use the stored zen grid size
+      const zenSize = zenGridSize || GRID_PROGRESSION[0];
 
+      setGridSize(zenSize);
+      setZenGridSize(zenSize);
+
+      // Initialize game with zen settings
+      const newGrid = generateSolvedGrid(zenSize);
+      setGrid(newGrid);
+      setHints(zenSize);
+      setMessage("");
+      setIsLoading(true);
+      setGameOver(false);
+      setGameWon(false);
+
+      // Initialize game with specific size
+      const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
+
+      worker.onmessage = (event: MessageEvent) => {
+        if (event.data.error) {
+          console.error("Error from worker:", event.data.error);
+          setMessage("Failed to generate grid.");
+        } else {
+          const cellStates: CellState[][] = event.data.grid;
+
+          // Double-check grid size from worker
+          if (!cellStates || cellStates.length !== zenSize || cellStates[0].length !== zenSize) {
+            setMessage("Failed to generate grid.");
+            return;
+          }
+
+          setGrid(cellStates);
+          const componentGrid = event.data.componentGrid;
+          worker.postMessage({
+            type: "generatePuzzle",
+            filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
+            componentGrid,
+          });
+        }
+        setIsLoading(false);
+        worker.terminate();
+      };
+
+      worker.onerror = (error) => {
+        setMessage("Failed to generate grid.");
+        setIsLoading(false);
+        worker.terminate();
+      };
+
+      worker.postMessage({ type: "generateGrid", size: zenSize });
+    } else if (mode === 'classic') {
+      // For classic mode, just update the grid size and other settings
+      // but don't automatically start a new game
+      const classicSize = gameMode === 'classic' ? classicGridSize : GRID_PROGRESSION[0];
 
       setGridSize(classicSize);
       setClassicGridSize(classicSize);
@@ -142,107 +191,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setConsecutiveWins(0);
       }
 
-      // Use a specific init function for classic mode to ensure correct size
-      const newGrid = generateSolvedGrid(classicSize);
-      setGrid(newGrid);
-      setHints(classicSize);
-      setMessage("");
-      setIsLoading(true);
-      setGameOver(false);
-      setGameWon(false);
-
-      // Initialize game with specific size
-      const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
-
-      worker.onmessage = (event: MessageEvent) => {
-        if (event.data.error) {
-          console.error("Error from worker:", event.data.error);
-          setMessage("Failed to generate grid.");
-        } else {
-          const cellStates: CellState[][] = event.data.grid;
-
-          // Double-check grid size from worker
-          if (!cellStates || cellStates.length !== classicSize || cellStates[0].length !== classicSize) {
-            setMessage("Failed to generate grid.");
-            return;
-          }
-
-          setGrid(cellStates);
-          const componentGrid = event.data.componentGrid;
-          worker.postMessage({
-            type: "generatePuzzle",
-            filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
-            componentGrid,
-          });
-        }
-        setIsLoading(false);
-        worker.terminate();
-      };
-
-      worker.onerror = (error) => {
-        setMessage("Failed to generate grid.");
-        setIsLoading(false);
-        worker.terminate();
-      };
-
-      worker.postMessage({ type: "generateGrid", size: classicSize });
-    } else if (mode === 'zen') {
-      // Use the stored zen grid size
-      const zenSize = zenGridSize || GRID_PROGRESSION[0];
-      
-      setGridSize(zenSize);
-      setZenGridSize(zenSize);
-      
-      // Initialize game with zen settings
-      const newGrid = generateSolvedGrid(zenSize);
-      setGrid(newGrid);
-      setHints(zenSize);
-      setMessage("");
-      setIsLoading(true);
-      setGameOver(false);
-      setGameWon(false);
-      
-      // Initialize game with specific size
-      const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
-      
-      worker.onmessage = (event: MessageEvent) => {
-        if (event.data.error) {
-          console.error("Error from worker:", event.data.error);
-          setMessage("Failed to generate grid.");
-        } else {
-          const cellStates: CellState[][] = event.data.grid;
-          
-          // Double-check grid size from worker
-          if (!cellStates || cellStates.length !== zenSize || cellStates[0].length !== zenSize) {
-            setMessage("Failed to generate grid.");
-            return;
-          }
-          
-          setGrid(cellStates);
-          const componentGrid = event.data.componentGrid;
-          worker.postMessage({
-            type: "generatePuzzle",
-            filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
-            componentGrid,
-          });
-        }
-        setIsLoading(false);
-        worker.terminate();
-      };
-      
-      worker.onerror = (error) => {
-        setMessage("Failed to generate grid.");
-        setIsLoading(false);
-        worker.terminate();
-      };
-      
-      worker.postMessage({ type: "generateGrid", size: zenSize });
+      // Don't automatically start a new game in classic mode
+      // The user will need to click the "New Game" button
     }
-  }, [gameMode, gridSize, zenGridSize, setZenGridSize, setClassicGridSize, setGridSize, setGameMode, setConsecutiveWins, classicGridSize, initializeGame]);
+  }, [gameMode, gridSize, zenGridSize, classicGridSize, GRID_PROGRESSION, setZenGridSize, setClassicGridSize, setGridSize, setGameMode, setConsecutiveWins, setGrid, setHints, setMessage, setIsLoading, setGameOver, setGameWon, generateSolvedGrid]);
 
   // Modify setGridSize to update the appropriate mode-specific grid size
   const customSetGridSize = useCallback((size: number) => {
-
     if (gameMode === 'zen') {
       // Update both zen grid size and current grid size
       setZenGridSize(size);
@@ -255,8 +210,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setClassicGridSize(size);
       setGridSize(size);
 
-      // Reinitialize game with the new grid size
-      initializeGame();
+      // Don't automatically reinitialize game in classic mode
+      // Let the user manually start a new game
     } else {
       // For other/undefined modes, just set the grid size
       setGridSize(size);
@@ -282,7 +237,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-
     // Calculate new win count ahead of time
     const newConsecutiveWins = consecutiveWins + 1;
 
@@ -298,96 +252,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setConsecutiveWins(0);
 
         // 2. Set message to inform user about level change
-        setMessage(`Level up! Grid size increased to ${nextGridSize}x${nextGridSize}`);
+        setMessage(`Level up! Grid size increased to ${nextGridSize}x${nextGridSize}. Click "New Game" to start a new game with the increased grid size.`);
 
-        // 3. Create a completely fresh game with the new size
-        // Instead of updating piece by piece, create an entirely new complete game state
-        setTimeout(() => {
-          // First reset all game state
-          setGameOver(false);
-          setGameWon(false);
-          setIsLoading(true);
+        // 3. Update the grid size for the next game, but don't start it automatically
+        // Using direct state setters instead of customSetGridSize to avoid auto-initialization
+        setClassicGridSize(nextGridSize);
+        setGridSize(nextGridSize);
+        setHints(nextGridSize);
 
-          // Then update size tracking
-          setClassicGridSize(nextGridSize);
-          setGridSize(nextGridSize);
-          setHints(nextGridSize);
-
-          // Create a fresh temporary grid of the correct size
-          const tempGrid = Array(nextGridSize).fill(null).map(() =>
-            Array(nextGridSize).fill(null).map(() => ({
-              value: 0,
-              revealed: false,
-              isMine: false,
-              componentId: 0
-            }))
-          );
-          setGrid(tempGrid);
-
-          // Finally start the worker with the EXACT grid size
-          const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
-
-          worker.onmessage = (event: MessageEvent) => {
-            if (event.data.error) {
-              console.error("Error from worker:", event.data.error);
-              setMessage("Failed to generate grid.");
-              setIsLoading(false);
-            } else {
-              const cellStates: CellState[][] = event.data.grid;
-
-              // Triple-check grid size from worker
-              if (!cellStates || cellStates.length !== nextGridSize || cellStates[0].length !== nextGridSize) {
-
-                // Force correct size if worker returned wrong size
-                if (cellStates) {
-                  // Create a properly sized grid using available data
-                  const correctedGrid = Array(nextGridSize).fill(null).map((_, row) =>
-                    Array(nextGridSize).fill(null).map((_, col) => {
-                      // Use data from worker if available, otherwise create empty cell
-                      if (cellStates[row] && cellStates[row][col]) {
-                        return cellStates[row][col];
-                      } else {
-                        return {
-                          value: (row + col) % nextGridSize + 1, // Simple deterministic value
-                          revealed: false,
-                          isMine: false,
-                          componentId: Math.floor(row / 2) * 2 + Math.floor(col / 2) // Simple component grouping
-                        };
-                      }
-                    })
-                  );
-                  setGrid(correctedGrid);
-                } else {
-                  // Fallback to generateSolvedGrid
-                  const backupGrid = generateSolvedGrid(nextGridSize);
-                  setGrid(backupGrid);
-                }
-                setMessage("Grid generated with corrections.");
-                setIsLoading(false);
-                worker.terminate();
-                return;
-              }
-
-              setGrid(cellStates);
-              const componentGrid = event.data.componentGrid;
-              worker.postMessage({
-                type: "generatePuzzle",
-                filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
-                componentGrid,
-              });
-            }
-            setIsLoading(false);
-            worker.terminate();
-          };
-
-          worker.onerror = (error) => {
-            setMessage("Failed to generate grid.");
-            setIsLoading(false);
-            worker.terminate();
-          };
-
-          worker.postMessage({ type: "generateGrid", size: nextGridSize });
-        }, 100);
+        // Important: Do NOT call initializeGame() here to prevent automatic restart
       } else {
         // Still increment wins even if we can't progress
         setConsecutiveWins(newConsecutiveWins);
@@ -396,25 +269,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
       // Just increment wins if we're not at the threshold yet
       setConsecutiveWins(newConsecutiveWins);
     }
-  }, [gameMode, gridSize, consecutiveWins, MAX_CONSECUTIVE_WINS_FOR_PROGRESSION, GRID_PROGRESSION, setClassicGridSize, setConsecutiveWins, setGrid, setHints, generateSolvedGrid, setGameOver, setGameWon, setIsLoading, setMessage]);
+  }, [gameMode, gridSize, consecutiveWins, MAX_CONSECUTIVE_WINS_FOR_PROGRESSION, GRID_PROGRESSION, setClassicGridSize, setConsecutiveWins, setGridSize, setHints, setMessage]);
 
   const resetConsecutiveWins = useCallback(() => {
-    if (gameMode === 'classic') {
-      // For classic mode, reset to the first (smallest) grid size
-      const resetSize = GRID_PROGRESSION[0];
-
-      // Update both classic grid size and current grid size
-      setClassicGridSize(resetSize);
-      setGridSize(resetSize);
-
-      initializeGame();
-    }
+    // Only reset the consecutive win count, don't change the grid size
     setConsecutiveWins(0);
-  }, [gameMode, gridSize, initializeGame]);
+  }, []);
 
   useEffect(() => {
-    initializeGame();
-  }, [initializeGame]);
+    // Only initialize the game on first mount, not when the game mode changes
+    if (!gameMode) {
+      initializeGame();
+    }
+  }, [initializeGame, gameMode]);
 
   // Optional: Add a console log to debug mode setting
   useEffect(() => {
