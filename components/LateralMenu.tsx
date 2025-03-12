@@ -115,7 +115,7 @@ export default function LateralMenu() {
                 <SelectContent
                   className="border-4 border-foreground"
                 >
-                  {[3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
+                  {[3, 4, 5, 6, 7, 8 ].map((size) => (
                     <SelectItem
                       key={size}
                       value={size.toString()}
