@@ -13,11 +13,13 @@ const Grid: React.FC = () => {
     gameWon,
     isLoading,
     initializeGame,
-    handleCellClick
+    handleCellClick,
+    gameMode
   } = useGame()
 
   // Handle clicking the grid when game is over
   const handleGameOverClick = () => {
+    // Allow clicking to start a new game in both modes when game is over
     initializeGame();
   }
 

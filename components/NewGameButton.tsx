@@ -11,12 +11,15 @@ const BUTTON_ICONS = {
 } as const;
 
 export default function NewGameButton() {
-  const { gameOver, gameWon, initializeGame, isLoading } = useGame();
+  const { gameOver, gameWon, initializeGame, isLoading, gameMode } = useGame();
 
-  // Initialize game on first render
+  // Initialize game on first render only for zen mode
   useEffect(() => {
-    initializeGame();
-  }, [initializeGame]);
+    // Only auto-initialize in zen mode, not in classic mode
+    if (gameMode === 'zen') {
+      initializeGame();
+    }
+  }, [initializeGame, gameMode]);
 
   // Add keyboard event handler
   useEffect(() => {
