@@ -30,6 +30,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const initializeGame = useCallback(() => {
     setMessage("");
     setIsLoading(true);
+    setGameOver(false);
+    setGameWon(false);
+    setGrid([]);
 
     const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
 
@@ -38,11 +41,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
         console.error("Error from worker:", event.data.error);
         setMessage("Failed to generate grid.");
       } else {
-        setGrid(event.data.grid);
-        const componentGrid = event.data.grid.map((row: CellState[]) => row.map(cell => cell.componentId));
+        const cellStates: CellState[][] = event.data.grid;
+        setGrid(cellStates);
+        const componentGrid = event.data.componentGrid;
+        if (!componentGrid || componentGrid.length !== gridSize || componentGrid[0].length !== gridSize) {
+          console.error("Invalid component grid received from worker");
+          setMessage("Failed to generate grid.");
+          return;
+        }
         worker.postMessage({
           type: "generatePuzzle",
-          filledGrid: event.data.grid.map((row: CellState[]) => row.map(cell => cell.value)),
+          filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
           componentGrid,
         });
       }
