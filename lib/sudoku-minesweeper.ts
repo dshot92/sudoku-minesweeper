@@ -416,7 +416,7 @@ export const handleCellClick = (
       newGrid,
       gameOver: true,
       gameWon: false,
-      message: "Game Over! You clicked on a mine."
+      message: "Game Over"
     };
   } else {
     // Check if all non-mine cells in this component are revealed
@@ -459,7 +459,7 @@ export const handleCellClick = (
         newGrid,
         gameOver: false,
         gameWon: true,
-        message: "Congratulations! You've won!"
+        message: "You won!"
       };
     }
   }
