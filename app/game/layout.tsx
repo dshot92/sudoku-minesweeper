@@ -35,12 +35,16 @@ function GameLayoutContent({ children }: { children: React.ReactNode; }) {
           </div>
         </div>
       </header>
-      <div className="flex-1 flex flex-col px-2">
-        <GameAlert />
-        {children}
-      </div>
-      <div className="absolute bottom-20 left-0 right-0 justify-center">
-        <ConsecutiveWinsIndicator />
+      <div className="flex-1 flex flex-col relative">
+        <div className="absolute top-4 left-0 right-0 z-10">
+          <GameAlert />
+        </div>
+        <div className="flex-1 flex items-center justify-center px-2">
+          {children}
+        </div>
+        <div className="absolute bottom-4 left-0 right-0">
+          <ConsecutiveWinsIndicator />
+        </div>
       </div>
     </div>
   );

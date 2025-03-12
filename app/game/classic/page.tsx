@@ -1,22 +1,35 @@
 'use client';
 
 import Grid from "@/components/Grid";
-import { useGame, GRID_PROGRESSION } from "@/contexts/GameContext";
-import { useEffect } from "react";
+import { useGame } from "@/contexts/GameContext";
+import { useEffect, useRef } from "react";
 
 export default function ClassicMode() {
-  const { setGameMode } = useGame();
+  const { setGameMode, gameMode, consecutiveWins } = useGame();
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    // Always start with the smallest grid and initialize the game
-    // The customSetGameMode function in GameContext now handles both
-    // setting the grid size and initializing the game
-    setGameMode('classic');
-  }, [setGameMode]);
+    // Only set the game mode once when the component first mounts
+    if (!initializedRef.current) {
+      console.log('📱 Setting game mode to classic (INITIAL SETUP ONLY)');
+      setGameMode('classic');
+      initializedRef.current = true;
+    }
+  }, []); // Empty dependency array ensures this only runs once on mount
+
+  useEffect(() => {
+    // Verify game mode is set correctly
+    console.log('🎮 Current game mode in classic page:', gameMode);
+  }, [gameMode]);
+
+  // Added to track win changes
+  useEffect(() => {
+    console.log('🏆 Consecutive wins changed in classic page:', consecutiveWins);
+  }, [consecutiveWins]);
 
   return (
-    <main className="flex-1 flex items-center justify-center relative">
+    <div className="flex-1 flex flex-col items-center justify-center">
       <Grid />
-    </main>
+    </div>
   );
 } 

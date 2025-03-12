@@ -7,25 +7,18 @@ export function GameAlert() {
   const { message } = useGame()
 
   return (
-    <>
-      {message && (
-        <div
-          className="absolute inset-x-0 pointer-events-none"
-          style={{
-            top: 'min(20%, 160px)',
-          }}
-        >
-          <div className="max-w-xl mx-auto px-10">
-            <Alert className="pointer-events-auto"
-              style={{
-                backgroundColor: 'var(--foreground)',
-                color: 'var(--background)'
-              }}>
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          </div>
-        </div>
-      )}
-    </>
+    <div
+      className={`flex max-w-xs mx-auto p-10 justify-center items-center pointer-events-none ${!message ? 'hidden' : ''}`}
+    >
+      <Alert
+        className="pointer-events-auto"
+        style={{
+          backgroundColor: 'var(--foreground)',
+          color: 'var(--background)'
+        }}
+      >
+        <AlertDescription>{message}</AlertDescription>
+      </Alert>
+    </div>
   )
 }
