@@ -110,7 +110,7 @@ export default function LateralMenu() {
                   <SelectValue placeholder="Select grid size" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[3, 4, 5, 6, 7].map((size) => (
+                  {[3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
                     <SelectItem
                       key={size}
                       value={size.toString()}
