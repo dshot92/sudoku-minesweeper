@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { CellState, generateSolvedGrid } from '@/lib/sudoku-minesweeper';
+import { CellState } from '@/lib/sudoku-minesweeper';
 import { useSettings } from './SettingsContext';
 
 interface GameContextType {
@@ -14,6 +14,7 @@ interface GameContextType {
   setGameOver: (gameOver: boolean) => void;
   setGameWon: (gameWon: boolean) => void;
   setMessage: (message: string) => void;
+  isLoading: boolean;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -24,13 +25,39 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [gameOver, setGameOver] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const initializeGame = useCallback(() => {
     setMessage("");
-    const newGrid = generateSolvedGrid(gridSize);
-    setGrid(newGrid);
-    setGameOver(false);
-    setGameWon(false);
+    setIsLoading(true);
+
+    const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
+
+    worker.onmessage = (event: MessageEvent) => {
+      if (event.data.error) {
+        console.error("Error from worker:", event.data.error);
+        setMessage("Failed to generate grid.");
+      } else {
+        setGrid(event.data.grid);
+        const componentGrid = event.data.grid.map((row: CellState[]) => row.map(cell => cell.componentId));
+        worker.postMessage({
+          type: "generatePuzzle",
+          filledGrid: event.data.grid.map((row: CellState[]) => row.map(cell => cell.value)),
+          componentGrid,
+        });
+      }
+      setIsLoading(false);
+      worker.terminate();
+    };
+
+    worker.onerror = (error) => {
+      console.error("Worker error:", error);
+      setMessage("Failed to generate grid.");
+      setIsLoading(false);
+      worker.terminate();
+    };
+
+    worker.postMessage({ type: "generateGrid", size: gridSize });
   }, [gridSize]);
 
   useEffect(() => {
@@ -48,7 +75,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGrid,
         setGameOver,
         setGameWon,
-        setMessage
+        setMessage,
+        isLoading,
       }}
     >
       {children}
@@ -62,4 +90,4 @@ export function useGame() {
     throw new Error('useGame must be used within a GameProvider');
   }
   return context;
-} 
+}

@@ -1,12 +1,14 @@
 "use client"
 
+import React from 'react'
 import { handleCellClick as handleCellClickLogic } from "@/lib/sudoku-minesweeper"
 import { Cell } from "./Cell"
 import { useSettings } from "@/contexts/SettingsContext"
 import { useGame } from "@/contexts/GameContext"
 import { useCallback } from 'react'
+import { Loader2 } from 'lucide-react'
 
-export default function Grid() {
+const Grid: React.FC = () => {
   const { gridSize } = useSettings()
   const {
     grid,
@@ -15,7 +17,8 @@ export default function Grid() {
     setGrid,
     setGameOver,
     setGameWon,
-    setMessage
+    setMessage,
+    isLoading
   } = useGame()
 
   const handleCellClick = useCallback((row: number, col: number) => {
@@ -30,6 +33,18 @@ export default function Grid() {
       setMessage(result.message)
     }
   }, [gameOver, gameWon, grid, gridSize, setGameOver, setGameWon, setGrid, setMessage])
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Loader2 className="animate-spin h-10 w-10" />
+      </div>
+    )
+  }
+
+  if (!grid || grid.length === 0) {
+    return <div>No grid data available.</div>
+  }
 
   return (
     <div className="grid grid-cols-1 max-w-2xl w-full mx-auto select-none">
@@ -53,3 +68,5 @@ export default function Grid() {
     </div>
   )
 }
+
+export default Grid

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/contexts/GameContext";
 import { useEffect } from "react";
+import { Loader2 } from 'lucide-react';
 
 const BUTTON_ICONS = {
   LOST: "/game-button/lost.svg",
@@ -11,7 +12,7 @@ const BUTTON_ICONS = {
 } as const;
 
 export default function NewGameButton() {
-  const { gameOver, gameWon, initializeGame } = useGame();
+  const { gameOver, gameWon, initializeGame, isLoading } = useGame();
 
   // Initialize game on first render
   useEffect(() => {
@@ -41,17 +42,22 @@ export default function NewGameButton() {
       onClick={initializeGame}
       className="flex items-center gap-2 p-2 h-auto"
       aria-label={"New Game"}
+      disabled={isLoading}
     >
-      <div
-        style={{
-          width: '36px',
-          height: '36px',
-          WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
-          mask: `url(${getButtonIcon()}) center/contain no-repeat`,
-          backgroundColor: 'var(--foreground)',
-          background: 'var(--background)'
-        }}
-      />
+      {isLoading ? (
+        <Loader2 className="animate-spin h-9 w-9" />
+      ) : (
+        <div
+          style={{
+            width: '36px',
+            height: '36px',
+            WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
+            mask: `url(${getButtonIcon()}) center/contain no-repeat`,
+            backgroundColor: 'var(--foreground)',
+            background: 'var(--background)'
+          }}
+        />
+      )}
     </Button>
   );
 } 
