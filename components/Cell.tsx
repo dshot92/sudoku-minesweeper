@@ -63,8 +63,8 @@ export function Cell({ cell, onClick, gridSize }: CellProps) {
         cell.value === gridSize ? (
           <div
             style={{
-              width: '42px',
-              height: '42px',
+              width: '36px',
+              height: '36px',
               WebkitMask: 'url("/mine.svg") center/contain no-repeat',
               mask: 'url("/mine.svg") center/contain no-repeat',
               backgroundColor: originalColor
@@ -74,13 +74,13 @@ export function Cell({ cell, onClick, gridSize }: CellProps) {
           <span
             style={{
               color: originalColor,
-              fontSize: '42px',
-              lineHeight: '42px',
+              fontSize: '36px',
+              lineHeight: '36px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '42px',
-              height: '42px'
+              width: '36px',
+              height: '36px'
             }}
           >
             {cell.value}
