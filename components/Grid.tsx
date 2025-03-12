@@ -14,7 +14,6 @@ const Grid: React.FC = () => {
     isLoading,
     initializeGame,
     handleCellClick,
-    gameMode
   } = useGame()
 
   // Handle clicking the grid when game is over
