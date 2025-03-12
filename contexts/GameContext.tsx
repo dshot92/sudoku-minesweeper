@@ -61,15 +61,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setGameWon(false);
 
     // Reset consecutive wins when starting a new game in classic mode
-    // but only if we're not coming from a level up (3 consecutive wins)
+    // but only if we're explicitly flagged to do so (after level progression)
     if (gameMode === 'classic') {
       if (shouldResetConsecutiveWins) {
         setConsecutiveWins(0);
         setShouldResetConsecutiveWins(false);
-      } else if (!gameWon) {
-        // Only reset consecutive wins if we're not coming from a win
-        // This preserves the consecutive win count when continuing after a win
-        setConsecutiveWins(0);
       }
     }
 
