@@ -10,7 +10,7 @@ export function GameAlert() {
     <>
       {message && (
         <div
-          className="fixed inset-x-0 pointer-events-none"
+          className="absolute inset-x-0 pointer-events-none"
           style={{
             top: 'min(20%, 160px)',
           }}
