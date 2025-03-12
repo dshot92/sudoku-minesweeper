@@ -3,13 +3,12 @@
 import React from 'react'
 import { handleCellClick as handleCellClickLogic } from "@/lib/sudoku-minesweeper"
 import { Cell } from "./Cell"
-import { useSettings } from "@/contexts/SettingsContext"
 import { useGame } from "@/contexts/GameContext"
 import { useCallback } from 'react'
 import { Loader2 } from 'lucide-react'
 
 const Grid: React.FC = () => {
-  const { gridSize } = useSettings()
+  const { gridSize } = useGame()
   const {
     grid,
     gameOver,
@@ -23,9 +22,8 @@ const Grid: React.FC = () => {
   } = useGame()
 
   const handleCellClick = useCallback((row: number, col: number) => {
-    if (gameOver || gameWon || grid[row][col].revealed) return
-
     const result = handleCellClickLogic(grid, row, col, gridSize)
+
     setGrid(result.newGrid)
     setGameOver(result.gameOver)
     setGameWon(result.gameWon)
@@ -33,6 +31,7 @@ const Grid: React.FC = () => {
     if (result.message) {
       setMessage(result.message)
     }
+
   }, [gameOver, gameWon, grid, gridSize, setGameOver, setGameWon, setGrid, setMessage])
 
   if (isLoading) {

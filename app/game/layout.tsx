@@ -5,6 +5,7 @@ import { GameProvider } from "@/contexts/GameContext";
 import NewGameButton from "@/components/NewGameButton";
 import { GameAlert } from "@/components/GameAlert";
 import { HintButton } from "@/components/HintButton";
+import ConsecutiveWinsIndicator from "@/components/ConsecutiveWinsIndicator";
 
 export default function GameLayout({
   children,
@@ -18,7 +19,7 @@ export default function GameLayout({
   );
 }
 
-function GameLayoutContent({ children, }: { children: React.ReactNode; }) {
+function GameLayoutContent({ children }: { children: React.ReactNode; }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="w-full">
@@ -37,6 +38,9 @@ function GameLayoutContent({ children, }: { children: React.ReactNode; }) {
       <div className="flex-1 flex flex-col px-2">
         <GameAlert />
         {children}
+      </div>
+      <div className="absolute bottom-20 left-0 right-0 justify-center">
+        <ConsecutiveWinsIndicator />
       </div>
     </div>
   );

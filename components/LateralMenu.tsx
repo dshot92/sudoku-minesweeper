@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ThemeToggle } from './theme-toggle';
-import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -13,13 +13,23 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Menu, X } from "lucide-react";
+import { useGame, GRID_PROGRESSION } from '@/contexts/GameContext';
 
 export default function LateralMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const { gridSize, setGridSize } = useSettings();
+  const { gridSize, setGridSize, setGameMode } = useGame();
+  const pathname = usePathname();
 
   const handleGridSizeChange = (value: string) => {
     setGridSize(parseInt(value));
+    setIsOpen(false);
+  };
+
+  const isZenMode = pathname === '/game/zen';
+  const isClassicMode = pathname === '/game/classic';
+
+  const handleModeChange = (mode: 'zen' | 'classic') => {
+    setGameMode(mode);
     setIsOpen(false);
   };
 
@@ -84,49 +94,53 @@ export default function LateralMenu() {
               <h3 className="text-sm font-semibold text-muted-foreground">Game Modes</h3>
               <nav className="space-y-4">
                 <Button
-                  variant="outline"
-                  className="w-full justify-start border-foreground py-2 h-auto min-h-[36px] text-base"
+                  variant={isZenMode ? "default" : "outline"}
+                  className="w-full justify-start border-foreground py-2 h-12 text-base"
                   asChild
+                  onClick={() => handleModeChange('zen')}
                 >
-                  <Link href="/game/zen" onClick={() => setIsOpen(false)}>
+                  <Link href="/game/zen">
                     Zen Mode
                   </Link>
                 </Button>
                 <Button
-                  variant="outline"
-                  className="w-full justify-start border-foreground py-2 h-auto min-h-[36px] text-base"
+                  variant={isClassicMode ? "default" : "outline"}
+                  className="w-full justify-start border-foreground py-2 h-12 text-base"
                   asChild
+                  onClick={() => handleModeChange('classic')}
                 >
-                  <Link href="/game/classic" onClick={() => setIsOpen(false)}>
+                  <Link href="/game/classic">
                     Classic Mode
                   </Link>
                 </Button>
               </nav>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground">Grid Size</h3>
-              <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
-                <SelectTrigger
-                  className="w-full border-foreground group border-4 py-2 h-auto min-h-[36px] text-base"
-                >
-                  <SelectValue placeholder="Select grid size" />
-                </SelectTrigger>
-                <SelectContent
-                  className="border-4 border-foreground"
-                >
-                  {[3, 4, 5, 6, 7, 8 ].map((size) => (
-                    <SelectItem
-                      key={size}
-                      value={size.toString()}
-                      className="min-h-[36px]"
-                    >
-                      {size} x {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {isZenMode && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground">Grid Size</h3>
+                <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
+                  <SelectTrigger
+                    className="w-full border-foreground group border-4 py-2 h-auto min-h-[36px] text-base"
+                  >
+                    <SelectValue placeholder="Select grid size" />
+                  </SelectTrigger>
+                  <SelectContent
+                    className="border-4 border-foreground"
+                  >
+                    {GRID_PROGRESSION.map((size) => (
+                      <SelectItem
+                        key={size}
+                        value={size.toString()}
+                        className="min-h-[36px]"
+                      >
+                        {size} x {size}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </div>
       </div>

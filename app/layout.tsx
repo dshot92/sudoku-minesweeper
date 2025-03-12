@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { SettingsProvider } from "@/contexts/SettingsContext";
+import { GameProvider } from "@/contexts/GameContext";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -41,9 +41,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SettingsProvider>
+          <GameProvider>
             {children}
-          </SettingsProvider>
+          </GameProvider>
         </ThemeProvider>
       </body>
     </html>
