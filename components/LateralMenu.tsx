@@ -60,7 +60,7 @@ export default function LateralMenu() {
         <div className="p-4">
           <div className="flex justify-between items-center mb-8">
             <Button
-              variant="outline"
+              variant={"outline"}
               className="justify-center border-foreground w-12 h-12 p-2"
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
@@ -85,7 +85,7 @@ export default function LateralMenu() {
               <nav className="space-y-4">
                 <Button
                   variant="outline"
-                  className="w-full justify-start border-foreground py-4 h-auto min-h-[42px] text-base"
+                  className="w-full justify-start border-foreground py-2 h-auto min-h-[36px] text-base"
                   asChild
                 >
                   <Link href="/game/zen" onClick={() => setIsOpen(false)}>
@@ -94,7 +94,7 @@ export default function LateralMenu() {
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full justify-start border-foreground py-4 h-auto min-h-[42px] text-base"
+                  className="w-full justify-start border-foreground py-2 h-auto min-h-[36px] text-base"
                   asChild
                 >
                   <Link href="/game/classic" onClick={() => setIsOpen(false)}>
@@ -107,15 +107,19 @@ export default function LateralMenu() {
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground">Grid Size</h3>
               <Select value={gridSize.toString()} onValueChange={handleGridSizeChange}>
-                <SelectTrigger className="w-full border-foreground min-h-[42px] group">
+                <SelectTrigger
+                  className="w-full border-foreground group border-4 py-2 h-auto min-h-[36px] text-base"
+                >
                   <SelectValue placeholder="Select grid size" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  className="border-4 border-foreground"
+                >
                   {[3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
                     <SelectItem
                       key={size}
                       value={size.toString()}
-                      className="min-h-[42px]"
+                      className="min-h-[36px]"
                     >
                       {size} x {size}
                     </SelectItem>
