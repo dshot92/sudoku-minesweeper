@@ -43,34 +43,69 @@ const generateLatinSquare = (
     return true;
   };
 
-  // Recursive function to fill the grid
-  const fillGrid = (row: number, col: number): boolean => {
-    if (col === size) {
-      return fillGrid(row + 1, 0);
+  // Helper function for efficient shuffling
+  const fisherYatesShuffle = (array: number[]): number[] => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
     }
-    if (row === size) {
-      return true;
-    }
+    return array;
+  };
 
-    // Create array of values 1 to n and shuffle it
-    const values = Array.from({ length: size }, (_, i) => i + 1)
-      .sort(() => Math.random() - 0.5);
+  // Revised fillGrid implementation
+  const fillGrid = (): boolean => {
+    const size = grid.length;
+    const stack: { row: number; col: number; values: number[] }[] = [];
+    let currentRow = 0;
+    let currentCol = 0;
 
-    for (const value of values) {
-      if (isValid(row, col, value)) {
-        grid[row][col] = value;
-        if (fillGrid(row, col + 1)) {
-          return true;
+    while (currentRow < size && currentCol < size) {
+      if (grid[currentRow][currentCol] === 0) {
+        const values = fisherYatesShuffle(Array.from({ length: size }, (_, i) => i + 1));
+        let foundValid = false;
+
+        for (const value of values) {
+          if (isValid(currentRow, currentCol, value)) {
+            grid[currentRow][currentCol] = value;
+            stack.push({ row: currentRow, col: currentCol, values });
+            foundValid = true;
+            break;
+          }
         }
-        grid[row][col] = 0; // backtrack
+
+        if (!foundValid) {
+          // Backtrack
+          while (stack.length > 0) {
+            const last = stack.pop()!;
+            grid[last.row][last.col] = 0;
+            if (last.values.length > 0) {
+              const nextValue = last.values.pop()!;
+              if (isValid(last.row, last.col, nextValue)) {
+                grid[last.row][last.col] = nextValue;
+                stack.push(last);
+                currentRow = last.row;
+                currentCol = last.col;
+                break;
+              }
+            }
+          }
+          if (stack.length === 0) return false;
+        }
+      }
+
+      // Move to next cell
+      currentCol++;
+      if (currentCol === size) {
+        currentRow++;
+        currentCol = 0;
       }
     }
 
-    return false;
+    return true;
   };
 
   // Try to fill the grid
-  return fillGrid(0, 0) ? grid : null;
+  return fillGrid() ? grid : null;
 };
 
 /**
@@ -430,4 +465,150 @@ export const handleCellClick = (
   }
 
   return { newGrid, gameOver: false, gameWon: false, message: "" };
+};
+
+// Add utility functions at the top
+const fisherYatesShuffle = <T>(array: T[]): T[] => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
+const cloneDeep = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
+const shuffle = <T>(array: T[]): T[] => fisherYatesShuffle([...array]);
+const getAllCoordinates = (size: number): [number, number][] =>
+  Array.from({ length: size }, (_, row) =>
+    Array.from({ length: size }, (_, col) => [row, col] as [number, number])
+  ).flat();
+
+// Update hasUniqueSolution signature
+const hasUniqueSolution = (grid: number[][], componentGrid: number[][]): boolean => {
+  const size = grid.length;
+  let solutions = 0;
+
+  // Fast fail for empty grid
+  if (grid.every(row => row.every(cell => cell === 0))) {
+    return false;
+  }
+
+  const quickSolve = (clone: number[][]): boolean => {
+    const emptyCells: [number, number][] = [];
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        if (clone[row][col] === 0) {
+          emptyCells.push([row, col]);
+        }
+      }
+    }
+
+    for (const [row, col] of emptyCells) {
+      const used = new Set<number>();
+
+      // Row constraints
+      for (let c = 0; c < size; c++) {
+        if (clone[row][c] !== 0) used.add(clone[row][c]);
+      }
+
+      // Column constraints
+      for (let r = 0; r < size; r++) {
+        if (clone[r][col] !== 0) used.add(clone[r][col]);
+      }
+
+      // Component constraints
+      const componentId = componentGrid[row][col];
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          if (componentGrid[r][c] === componentId && clone[r][c] !== 0) {
+            used.add(clone[r][c]);
+          }
+        }
+      }
+
+      if (used.size === size - 1) {
+        const value = Array.from({ length: size }, (_, i) => i + 1)
+          .find(v => !used.has(v))!;
+        clone[row][col] = value;
+      }
+    }
+    return true;
+  };
+
+  // Main check with optimizations
+  const countSolutions = (row: number, col: number): number => {
+    if (row === size) return 1;
+    if (solutions > 1) return solutions;
+
+    const nextCol = (col + 1) % size;
+    const nextRow = nextCol === 0 ? row + 1 : row;
+
+    if (grid[row][col] !== 0) {
+      return countSolutions(nextRow, nextCol);
+    }
+
+    let total = 0;
+    const values = fisherYatesShuffle(Array.from({ length: size }, (_, i) => i + 1));
+
+    for (const value of values) {
+      if (isValid(row, col, value)) {
+        grid[row][col] = value;
+        total += countSolutions(nextRow, nextCol);
+        grid[row][col] = 0;
+        if (total > 1) break;
+      }
+    }
+
+    return total;
+  };
+
+  // Redefine isValid within this scope
+  const isValid = (row: number, col: number, value: number): boolean => {
+    // Check row
+    for (let c = 0; c < size; c++) {
+      if (c !== col && clone[row][c] === value) return false;
+    }
+
+    // Check column
+    for (let r = 0; r < size; r++) {
+      if (r !== row && clone[r][col] === value) return false;
+    }
+
+    // Check component
+    const currentComponent = componentGrid[row][col];
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (componentGrid[r][c] === currentComponent && clone[r][c] === value) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  // First try quick deduction
+  const clone = grid.map(row => [...row]);
+  if (!quickSolve(clone)) return false;
+
+  // Then count solutions
+  solutions = countSolutions(0, 0);
+  return solutions === 1;
+};
+
+// Update generatePuzzle to pass componentGrid
+export const generatePuzzle = (filledGrid: number[][], componentGrid: number[][]): number[][] => {
+  const puzzle = cloneDeep(filledGrid);
+  const cells = shuffle(getAllCoordinates(puzzle.length));
+
+  for (const [row, col] of cells) {
+    const original = puzzle[row][col];
+    puzzle[row][col] = 0;
+
+    if (!hasUniqueSolution(puzzle, componentGrid)) {
+      puzzle[row][col] = original; // Restore if uniqueness broken
+    }
+  }
+
+  return puzzle;
 };
