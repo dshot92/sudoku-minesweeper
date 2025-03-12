@@ -20,6 +20,7 @@ export default function LateralMenu() {
 
   const handleGridSizeChange = (value: string) => {
     setGridSize(parseInt(value));
+    setIsOpen(false);
   };
 
   return (
