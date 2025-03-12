@@ -3,9 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { generateHint, handleCellClick } from '@/lib/sudoku-minesweeper';
 import { useGame } from '@/contexts/GameContext';
-import Image from 'next/image';
-import { useState, useCallback } from 'react';
-import { ReactNode } from 'react';
 
 export function HintButton() {
   const {
