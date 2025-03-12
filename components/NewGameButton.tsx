@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/contexts/GameContext";
 import { useEffect } from "react";
-import { Loader2 } from 'lucide-react';
 
 const BUTTON_ICONS = {
   LOST: "/game-button/lost.svg",
@@ -45,19 +44,28 @@ export default function NewGameButton() {
       disabled={isLoading}
     >
       {isLoading ? (
-        <Loader2 className="animate-spin h-9 w-9" />
+        <div style={{
+          width: '36px',
+          height: '36px',
+          WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
+          mask: `url(${getButtonIcon()}) center/contain no-repeat`,
+          backgroundColor: 'var(--foreground)',
+          background: 'var(--background)',
+          animation: 'spin 0.5s linear infinite',
+          transition: 'transform 0.5s ease-in-out',
+        }}
+        />
       ) : (
-        <div
-          style={{
-            width: '36px',
-            height: '36px',
-            WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
-            mask: `url(${getButtonIcon()}) center/contain no-repeat`,
-            backgroundColor: 'var(--foreground)',
-            background: 'var(--background)'
-          }}
+        <div style={{
+          width: '36px',
+          height: '36px',
+          WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
+          mask: `url(${getButtonIcon()}) center/contain no-repeat`,
+          backgroundColor: 'var(--foreground)',
+          background: 'var(--background)'
+        }}
         />
       )}
     </Button>
   );
-} 
+}
