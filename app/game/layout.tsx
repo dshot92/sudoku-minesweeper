@@ -23,7 +23,7 @@ function GameLayoutContent({ children }: { children: React.ReactNode; }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="w-full h-[72px]">
-        <div className="container mx-auto h-full p-4 flex items-center">
+        <div className="container h-full mt-2 p-4 flex items-center">
           <div className="flex-1 flex justify-start">
             <LateralMenu />
           </div>
