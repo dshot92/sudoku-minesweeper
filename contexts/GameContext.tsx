@@ -52,13 +52,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [gameMode, setGameMode] = useState<'classic' | 'zen' | undefined>(undefined);
 
   const initializeGame = useCallback(() => {
-    console.log("🎮 Initializing Game with current state:", {
-      consecutiveWins,
-      gameMode,
-      gridSize,
-      gameOver,
-      gameWon
-    });
 
     setMessage("");
     setIsLoading(true);
@@ -71,16 +64,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       ? (classicGridSize || GRID_PROGRESSION[0])
       : (zenGridSize || GRID_PROGRESSION[0]);
 
-    console.log('🔍 Initializing Game (MODE-AWARE):', {
-      gameMode,
-      zenGridSize,
-      classicGridSize,
-      gameInitSize,
-      currentGridProgression: GRID_PROGRESSION,
-      consecutiveWins
-    });
-
-    // Explicitly set grid size based on game mode
     setGridSize(gameInitSize);
 
     // Regenerate the grid with the EXACT correct size
@@ -92,17 +75,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     worker.onmessage = (event: MessageEvent) => {
       if (event.data.error) {
-        console.error("Error from worker:", event.data.error);
         setMessage("Failed to generate grid.");
       } else {
         const cellStates: CellState[][] = event.data.grid;
 
         // Double-check grid size from worker
         if (!cellStates || cellStates.length !== gameInitSize || cellStates[0].length !== gameInitSize) {
-          console.error("Invalid grid size from worker", {
-            expectedSize: gameInitSize,
-            actualSize: cellStates?.length
-          });
           setMessage("Failed to generate grid.");
           return;
         }
@@ -110,10 +88,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGrid(cellStates);
         const componentGrid = event.data.componentGrid;
         if (!componentGrid || componentGrid.length !== gameInitSize || componentGrid[0].length !== gameInitSize) {
-          console.error("Invalid component grid received from worker", {
-            expectedSize: gameInitSize,
-            actualSize: componentGrid?.length
-          });
           setMessage("Failed to generate grid.");
           return;
         }
@@ -128,7 +102,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
 
     worker.onerror = (error) => {
-      console.error("Worker error:", error);
       setMessage("Failed to generate grid.");
       setIsLoading(false);
       worker.terminate();
@@ -141,20 +114,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const customSetGameMode = useCallback((mode: 'classic' | 'zen') => {
     // If we're already in this mode, don't do anything to avoid resetting progress
     if (gameMode === mode) {
-      console.log(`🔄 Already in ${mode} mode, ignoring mode switch request`);
       return;
     }
 
-    console.log('🔄 Switching Game Mode:', {
-      currentMode: gameMode,
-      newMode: mode,
-      currentGridSize: gridSize,
-      zenGridSize,
-      classicGridSize,
-      GRID_PROGRESSION
-    });
-
-    // First, store the current grid size for the current mode
     if (gameMode === 'zen' && mode === 'classic') {
       setZenGridSize(gridSize);
     } else if (gameMode === 'classic' && mode === 'zen') {
@@ -171,7 +133,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       // or coming from another mode, not when already in classic
       const classicSize = gameMode === 'classic' ? classicGridSize : GRID_PROGRESSION[0];
 
-      console.log('🎮 Initializing classic mode with size:', classicSize);
 
       setGridSize(classicSize);
       setClassicGridSize(classicSize);
@@ -179,7 +140,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       // Only reset consecutive wins when first entering classic mode
       if (gameMode !== 'classic') {
         setConsecutiveWins(0);
-        console.log('🔄 Reset consecutive wins - new to classic mode');
       }
 
       // Use a specific init function for classic mode to ensure correct size
@@ -203,10 +163,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
           // Double-check grid size from worker
           if (!cellStates || cellStates.length !== classicSize || cellStates[0].length !== classicSize) {
-            console.error("Invalid grid size from worker", {
-              expectedSize: classicSize,
-              actualSize: cellStates?.length
-            });
             setMessage("Failed to generate grid.");
             return;
           }
@@ -224,7 +180,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       };
 
       worker.onerror = (error) => {
-        console.error("Worker error:", error);
         setMessage("Failed to generate grid.");
         setIsLoading(false);
         worker.terminate();
@@ -238,13 +193,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Modify setGridSize to update the appropriate mode-specific grid size
   const customSetGridSize = useCallback((size: number) => {
-    console.log('🔢 Setting Grid Size:', {
-      currentMode: gameMode,
-      newSize: size,
-      zenGridSize,
-      classicGridSize,
-      currentGridSize: gridSize
-    });
 
     if (gameMode === 'zen') {
       // Update both zen grid size and current grid size
@@ -282,49 +230,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const incrementConsecutiveWins = useCallback(() => {
     // Ensure we're in classic mode before proceeding - extra safety check
     if (gameMode !== 'classic') {
-      console.log('⚠️ incrementConsecutiveWins called but not in classic mode:', gameMode);
       return;
     }
 
-    console.log('⭐ incrementConsecutiveWins called, current state:', {
-      consecutiveWins,
-      gameMode,
-      gridSize,
-      progression: GRID_PROGRESSION,
-      threshold: MAX_CONSECUTIVE_WINS_FOR_PROGRESSION
-    });
 
     // Calculate new win count ahead of time
     const newConsecutiveWins = consecutiveWins + 1;
-    console.log(`🏆 Calculating new consecutive wins: ${consecutiveWins} → ${newConsecutiveWins}`);
 
     // Check if we've reached the max consecutive wins for progression
     if (newConsecutiveWins >= MAX_CONSECUTIVE_WINS_FOR_PROGRESSION) {
       // Automatically progress grid size if possible
       const currentIndex = GRID_PROGRESSION.indexOf(gridSize);
 
-      console.log('📊 Checking grid progression:', {
-        currentIndex,
-        gridSize,
-        GRID_PROGRESSION,
-        maxIndex: GRID_PROGRESSION.length - 1
-      });
-
       if (currentIndex >= 0 && currentIndex < GRID_PROGRESSION.length - 1) {
         const nextGridSize = GRID_PROGRESSION[currentIndex + 1];
 
-        console.log('🚀 LEVEL UP! Progressing Grid Size:', {
-          currentGridSize: gridSize,
-          nextGridSize,
-          gameMode,
-          newConsecutiveWins
-        });
-
-        // COMPLETELY REVISED APPROACH: Use a fresh clean slate approach
-
         // 1. Reset consecutive wins counter first
         setConsecutiveWins(0);
-        console.log('🔄 Reset consecutive wins to 0 for next level');
 
         // 2. Set message to inform user about level change
         setMessage(`Level up! Grid size increased to ${nextGridSize}x${nextGridSize}`);
@@ -354,7 +276,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
           setGrid(tempGrid);
 
           // Finally start the worker with the EXACT grid size
-          console.log('🎮 Starting fresh worker with EXACT new grid size:', nextGridSize);
           const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
 
           worker.onmessage = (event: MessageEvent) => {
@@ -367,11 +288,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
               // Triple-check grid size from worker
               if (!cellStates || cellStates.length !== nextGridSize || cellStates[0].length !== nextGridSize) {
-                console.error("Invalid grid size from worker", {
-                  expectedSize: nextGridSize,
-                  actualSize: cellStates?.length,
-                  receivedGrid: cellStates
-                });
 
                 // Force correct size if worker returned wrong size
                 if (cellStates) {
@@ -403,7 +319,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 return;
               }
 
-              console.log('✅ Worker generated correct grid size:', cellStates.length);
               setGrid(cellStates);
               const componentGrid = event.data.componentGrid;
               worker.postMessage({
@@ -417,7 +332,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
           };
 
           worker.onerror = (error) => {
-            console.error("Worker error:", error);
             setMessage("Failed to generate grid.");
             setIsLoading(false);
             worker.terminate();
@@ -426,13 +340,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
           worker.postMessage({ type: "generateGrid", size: nextGridSize });
         }, 100);
       } else {
-        console.log('⛔ Cannot progress grid size - already at maximum level or invalid index');
         // Still increment wins even if we can't progress
         setConsecutiveWins(newConsecutiveWins);
       }
     } else {
       // Just increment wins if we're not at the threshold yet
-      console.log(`⏫ Incrementing consecutive wins to ${newConsecutiveWins}`);
       setConsecutiveWins(newConsecutiveWins);
     }
   }, [gameMode, gridSize, consecutiveWins, MAX_CONSECUTIVE_WINS_FOR_PROGRESSION, GRID_PROGRESSION, setClassicGridSize, setConsecutiveWins, setGrid, setHints, generateSolvedGrid, setGameOver, setGameWon, setIsLoading, setMessage]);
@@ -441,12 +353,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (gameMode === 'classic') {
       // For classic mode, reset to the first (smallest) grid size
       const resetSize = GRID_PROGRESSION[0];
-
-      console.log('🔄 Resetting Grid Size:', {
-        currentGridSize: gridSize,
-        resetSize,
-        gameMode
-      });
 
       // Update both classic grid size and current grid size
       setClassicGridSize(resetSize);
@@ -463,7 +369,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Optional: Add a console log to debug mode setting
   useEffect(() => {
-    console.log('Current Game Mode:', gameMode);
   }, [gameMode]);
 
   const value = {
@@ -489,30 +394,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     handleCellClick: (row: number, col: number) => {
       // Skip if game already won or over
       if (gameWon || gameOver) {
-        console.log('Game already in end state, ignoring click');
         return { newGrid: grid, gameOver, gameWon, message };
       }
 
       const result = handleCellClick(grid, row, col, gridSize);
-
-      // Debug logging
-      console.log('🎲 Game Click Result:', {
-        row,
-        col,
-        gridSize,
-        gameMode,
-        gameWon: result.gameWon,
-        gameOver: result.gameOver,
-        message: result.message,
-        currentConsecutiveWins: consecutiveWins
-      });
 
       // Always update the grid
       setGrid(result.newGrid);
 
       // Handle game won condition
       if (result.gameWon) {
-        console.log('🏆 Game Won! Setting game state and incrementing consecutive wins');
 
         // Set game state first
         setGameWon(true);
@@ -520,19 +411,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
         // Then increment consecutive wins for classic mode in its own sync block
         if (gameMode === 'classic') {
-          console.log('🔢 About to increment consecutive wins in classic mode, current:', consecutiveWins);
-
           // We want to process this immediately and not batch it with other state updates
           queueMicrotask(() => {
             incrementConsecutiveWins();
-            console.log('🔢 Incremented consecutive wins in classic mode');
           });
         }
       }
 
       // Handle game over condition
       if (result.gameOver) {
-        console.log('💥 Game Over! Setting game state and resetting consecutive wins');
         setGameOver(true);
         setMessage(result.message || "Game Over! Try again.");
         resetConsecutiveWins();

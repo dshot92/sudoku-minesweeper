@@ -40,10 +40,8 @@ export function HintButton() {
 
         // Increment consecutive wins for classic mode
         if (gameMode === 'classic') {
-          console.log('🔢 About to increment consecutive wins from hint in classic mode');
           queueMicrotask(() => {
             incrementConsecutiveWins();
-            console.log('🔢 Incremented consecutive wins from hint in classic mode');
           });
         }
       }

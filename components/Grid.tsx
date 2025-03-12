@@ -18,7 +18,6 @@ const Grid: React.FC = () => {
 
   // Handle clicking the grid when game is over
   const handleGameOverClick = () => {
-    console.log("🔄 Grid clicked when game over/won, reinitializing game");
     initializeGame();
   }
 
