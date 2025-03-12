@@ -455,13 +455,62 @@ export const handleCellClick = (
     }
 
     if (allNonMinesRevealed) {
-      return {
-        newGrid,
-        gameOver: false,
-        gameWon: true,
-        message: "You won!"
-      };
+      // Verify that all mines are also revealed
+      let allMinesRevealed = true;
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          if (newGrid[r][c].isMine && !newGrid[r][c].revealed) {
+            allMinesRevealed = false;
+            break;
+          }
+        }
+        if (!allMinesRevealed) break;
+      }
+
+      if (allMinesRevealed) {
+        return {
+          newGrid,
+          gameOver: false,
+          gameWon: true,
+          message: "You won!"
+        };
+      }
     }
+  }
+
+  // Modify the win condition check to be more comprehensive
+  const checkGameWon = (newGrid: CellState[][]): boolean => {
+    // Check if all non-mine cells are revealed
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        const cell = newGrid[r][c];
+        if (!cell.isMine && !cell.revealed) {
+          return false;
+        }
+      }
+    }
+
+    // Check if all mines are revealed
+    for (let r = 0; r < gridSize; r++) {
+      for (let c = 0; c < gridSize; c++) {
+        const cell = newGrid[r][c];
+        if (cell.isMine && !cell.revealed) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  // Use the new comprehensive win check
+  if (checkGameWon(newGrid)) {
+    return {
+      newGrid,
+      gameOver: false,
+      gameWon: true,
+      message: "You won!"
+    };
   }
 
   return { newGrid, gameOver: false, gameWon: false, message: "" };
@@ -611,4 +660,29 @@ export const generatePuzzle = (filledGrid: number[][], componentGrid: number[][]
   }
 
   return puzzle;
+};
+
+// Add this function to the existing file
+export const generateHint = (grid: CellState[][]): { row: number, col: number } | null => {
+  const size = grid.length;
+  const hiddenNonMineCells: { row: number, col: number }[] = [];
+
+  // Find all hidden non-mine cells
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = grid[row][col];
+      if (!cell.revealed && !cell.isMine) {
+        hiddenNonMineCells.push({ row, col });
+      }
+    }
+  }
+
+  // If no hidden non-mine cells, return null
+  if (hiddenNonMineCells.length === 0) {
+    return null;
+  }
+
+  // Randomly select a hidden non-mine cell
+  const randomIndex = Math.floor(Math.random() * hiddenNonMineCells.length);
+  return hiddenNonMineCells[randomIndex];
 };

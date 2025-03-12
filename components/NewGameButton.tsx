@@ -57,14 +57,13 @@ export default function NewGameButton() {
         />
       ) : (
         <div style={{
-          width: '36px',
-          height: '36px',
+          width: '39px',
+          height: '39px',
           WebkitMask: `url(${getButtonIcon()}) center/contain no-repeat`,
           mask: `url(${getButtonIcon()}) center/contain no-repeat`,
           backgroundColor: 'var(--foreground)',
           background: 'var(--background)'
-        }}
-        />
+        }} />
       )}
     </Button>
   );
