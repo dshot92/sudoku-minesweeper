@@ -18,7 +18,8 @@ const Grid: React.FC = () => {
     setGameOver,
     setGameWon,
     setMessage,
-    isLoading
+    isLoading,
+    initializeGame
   } = useGame()
 
   const handleCellClick = useCallback((row: number, col: number) => {
@@ -46,8 +47,13 @@ const Grid: React.FC = () => {
     return <div>No grid data available.</div>
   }
 
+  const isGameOver = gameOver || gameWon
+
   return (
-    <div className="grid grid-cols-1 max-w-2xl w-full mx-auto select-none">
+    <div
+      className={`grid grid-cols-1 max-w-2xl w-full mx-auto select-none ${isGameOver ? 'cursor-pointer' : ''}`}
+      onClick={isGameOver ? initializeGame : undefined}
+    >
       <div
         className="grid w-full aspect-square max-w-[80vh] mx-auto text-black font-bold text-6xl"
         style={{
