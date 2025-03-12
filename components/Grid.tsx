@@ -38,7 +38,7 @@ const Grid: React.FC = () => {
 
   return (
     <div
-      className={`grid grid-cols-1 max-w-2xl w-full mx-auto my-auto select-none ${isGameOver ? 'cursor-pointer' : ''}`}
+      className={`grid grid-cols-1 p-2 max-w-2xl w-full mx-auto my-auto select-none ${isGameOver ? 'cursor-pointer' : ''}`}
       onClick={isGameOver ? handleGameOverClick : undefined}
     >
       <div

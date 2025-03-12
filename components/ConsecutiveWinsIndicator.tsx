@@ -7,15 +7,12 @@ export default function ConsecutiveWinsIndicator() {
     maxConsecutiveWinsForProgression
   } = useGame();
 
-  if (gameMode !== 'classic') {
-    return null;
-  }
-
   const css_win = 'bg-foreground';
   const css_loss = 'border-4 border-foreground bg-background';
 
+  // Always return the component structure but with hidden class when not in classic mode
   return (
-    <div className="flex justify-center w-full">
+    <div className={`w-full flex justify-center items-center ${gameMode !== 'classic' ? 'invisible' : ''}`}>
       <div className="flex justify-center">
         {Array.from({ length: maxConsecutiveWinsForProgression }, (_, index) => (
           <div

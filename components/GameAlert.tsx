@@ -7,11 +7,9 @@ export function GameAlert() {
   const { message } = useGame()
 
   return (
-    <div
-      className={`flex max-w-xs mx-auto p-10 justify-center items-center pointer-events-none ${!message ? 'hidden' : ''}`}
-    >
+    <div className="w-full flex justify-center items-center">
       <Alert
-        className="pointer-events-auto"
+        className={`pointer-events-auto max-w-xs ${!message ? 'hidden' : ''}`}
         style={{
           backgroundColor: 'var(--foreground)',
           color: 'var(--background)'

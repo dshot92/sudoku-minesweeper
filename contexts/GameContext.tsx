@@ -320,24 +320,111 @@ export function GameProvider({ children }: { children: ReactNode }) {
           newConsecutiveWins
         });
 
-        // Important: do this in a specific order to prevent race conditions
+        // COMPLETELY REVISED APPROACH: Use a fresh clean slate approach
 
-        // 1. First, update the next grid size in the context state
-        setClassicGridSize(nextGridSize);
-
-        // 2. Reset consecutive wins counter
+        // 1. Reset consecutive wins counter first
         setConsecutiveWins(0);
         console.log('🔄 Reset consecutive wins to 0 for next level');
 
-        // 3. Then update the active grid size
-        setGridSize(nextGridSize);
+        // 2. Set message to inform user about level change
+        setMessage(`Level up! Grid size increased to ${nextGridSize}x${nextGridSize}`);
 
-        // 4. Finally, initialize the game with the new size in a separate microtask
-        // to ensure the state updates are processed first
-        queueMicrotask(() => {
-          console.log('🎮 Initializing game with new grid size:', nextGridSize);
-          initializeGame();
-        });
+        // 3. Create a completely fresh game with the new size
+        // Instead of updating piece by piece, create an entirely new complete game state
+        setTimeout(() => {
+          // First reset all game state
+          setGameOver(false);
+          setGameWon(false);
+          setIsLoading(true);
+
+          // Then update size tracking
+          setClassicGridSize(nextGridSize);
+          setGridSize(nextGridSize);
+          setHints(nextGridSize);
+
+          // Create a fresh temporary grid of the correct size
+          const tempGrid = Array(nextGridSize).fill(null).map(() =>
+            Array(nextGridSize).fill(null).map(() => ({
+              value: 0,
+              revealed: false,
+              isMine: false,
+              componentId: 0
+            }))
+          );
+          setGrid(tempGrid);
+
+          // Finally start the worker with the EXACT grid size
+          console.log('🎮 Starting fresh worker with EXACT new grid size:', nextGridSize);
+          const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
+
+          worker.onmessage = (event: MessageEvent) => {
+            if (event.data.error) {
+              console.error("Error from worker:", event.data.error);
+              setMessage("Failed to generate grid.");
+              setIsLoading(false);
+            } else {
+              const cellStates: CellState[][] = event.data.grid;
+
+              // Triple-check grid size from worker
+              if (!cellStates || cellStates.length !== nextGridSize || cellStates[0].length !== nextGridSize) {
+                console.error("Invalid grid size from worker", {
+                  expectedSize: nextGridSize,
+                  actualSize: cellStates?.length,
+                  receivedGrid: cellStates
+                });
+
+                // Force correct size if worker returned wrong size
+                if (cellStates) {
+                  // Create a properly sized grid using available data
+                  const correctedGrid = Array(nextGridSize).fill(null).map((_, row) =>
+                    Array(nextGridSize).fill(null).map((_, col) => {
+                      // Use data from worker if available, otherwise create empty cell
+                      if (cellStates[row] && cellStates[row][col]) {
+                        return cellStates[row][col];
+                      } else {
+                        return {
+                          value: (row + col) % nextGridSize + 1, // Simple deterministic value
+                          revealed: false,
+                          isMine: false,
+                          componentId: Math.floor(row / 2) * 2 + Math.floor(col / 2) // Simple component grouping
+                        };
+                      }
+                    })
+                  );
+                  setGrid(correctedGrid);
+                } else {
+                  // Fallback to generateSolvedGrid
+                  const backupGrid = generateSolvedGrid(nextGridSize);
+                  setGrid(backupGrid);
+                }
+                setMessage("Grid generated with corrections.");
+                setIsLoading(false);
+                worker.terminate();
+                return;
+              }
+
+              console.log('✅ Worker generated correct grid size:', cellStates.length);
+              setGrid(cellStates);
+              const componentGrid = event.data.componentGrid;
+              worker.postMessage({
+                type: "generatePuzzle",
+                filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
+                componentGrid,
+              });
+            }
+            setIsLoading(false);
+            worker.terminate();
+          };
+
+          worker.onerror = (error) => {
+            console.error("Worker error:", error);
+            setMessage("Failed to generate grid.");
+            setIsLoading(false);
+            worker.terminate();
+          };
+
+          worker.postMessage({ type: "generateGrid", size: nextGridSize });
+        }, 100);
       } else {
         console.log('⛔ Cannot progress grid size - already at maximum level or invalid index');
         // Still increment wins even if we can't progress
@@ -348,7 +435,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       console.log(`⏫ Incrementing consecutive wins to ${newConsecutiveWins}`);
       setConsecutiveWins(newConsecutiveWins);
     }
-  }, [gameMode, gridSize, initializeGame, consecutiveWins, MAX_CONSECUTIVE_WINS_FOR_PROGRESSION, GRID_PROGRESSION, setClassicGridSize, setConsecutiveWins]);
+  }, [gameMode, gridSize, consecutiveWins, MAX_CONSECUTIVE_WINS_FOR_PROGRESSION, GRID_PROGRESSION, setClassicGridSize, setConsecutiveWins, setGrid, setHints, generateSolvedGrid, setGameOver, setGameWon, setIsLoading, setMessage]);
 
   const resetConsecutiveWins = useCallback(() => {
     if (gameMode === 'classic') {

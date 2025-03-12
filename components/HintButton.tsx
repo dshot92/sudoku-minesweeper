@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { generateHint, handleCellClick } from '@/lib/sudoku-minesweeper';
 import { useGame } from '@/contexts/GameContext';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 export function HintButton() {
   const {
@@ -12,10 +12,12 @@ export function HintButton() {
     gridSize,
     incrementHintUsage,
     setGameWon,
-    setMessage
+    setMessage,
+    gameMode,
+    incrementConsecutiveWins
   } = useGame();
 
-  const handleHint = () => {
+  const handleHint = useCallback(() => {
     // Generate a hint
     const hintCell = generateHint(grid);
 
@@ -35,9 +37,18 @@ export function HintButton() {
       if (gameWon) {
         setGameWon(true);
         setMessage(message);
+
+        // Increment consecutive wins for classic mode
+        if (gameMode === 'classic') {
+          console.log('🔢 About to increment consecutive wins from hint in classic mode');
+          queueMicrotask(() => {
+            incrementConsecutiveWins();
+            console.log('🔢 Incremented consecutive wins from hint in classic mode');
+          });
+        }
       }
     }
-  };
+  }, [grid, gridSize, incrementHintUsage, setGameWon, setGrid, setMessage, gameMode, incrementConsecutiveWins]);
 
   // Add keyboard event listener for 'h' key
   useEffect(() => {
@@ -55,7 +66,7 @@ export function HintButton() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [grid, gridSize, incrementHintUsage, setGameWon, setGrid, setMessage]);
+  }, [handleHint]);
 
   return (
     <Button

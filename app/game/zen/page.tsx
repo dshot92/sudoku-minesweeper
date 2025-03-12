@@ -15,10 +15,8 @@ export default function ZenMode() {
   }, [setGameMode]);
 
   return (
-    <main className="flex-1 flex flex-col items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center">
       <Grid />
-      {/* Placeholder to match ConsecutiveWinsIndicator's height */}
-      <div className="h-[68px]"></div>
-    </main>
+    </div>
   );
 }

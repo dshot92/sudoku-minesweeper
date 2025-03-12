@@ -15,7 +15,7 @@ export default function ClassicMode() {
       setGameMode('classic');
       initializedRef.current = true;
     }
-  }, []); // Empty dependency array ensures this only runs once on mount
+  }, [setGameMode]);
 
   useEffect(() => {
     // Verify game mode is set correctly
@@ -28,7 +28,7 @@ export default function ClassicMode() {
   }, [consecutiveWins]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center">
       <Grid />
     </div>
   );
