@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback, useReducer, useRef } from 'react';
 import { CellState, generateSolvedGrid, handleCellClick } from '@/lib/sudoku-minesweeper';
 
 // Define grid progression and consecutive win parameters
@@ -34,14 +34,103 @@ interface GameContextType {
   gameMode?: 'classic' | 'zen';
   setGameMode: (mode: 'classic' | 'zen') => void;
   nextGridSize: number | null;
+  generateNewGrid: () => void;
+}
+
+// Define game mode state interface
+interface GameModeState {
+  gameMode: 'classic' | 'zen' | undefined;
+  zenGridSize: number;
+  classicGridSize: number;
+  currentGridSize: number;
+}
+
+// Define actions for the reducer
+type GameModeAction =
+  | { type: 'SET_MODE', payload: { mode: 'classic' | 'zen' } }
+  | { type: 'SET_GRID_SIZE', payload: { size: number } }
+  | { type: 'INITIALIZE', payload: { defaultSize: number } };
+
+// Game mode reducer for more predictable state updates
+function gameModeReducer(state: GameModeState, action: GameModeAction): GameModeState {
+  switch (action.type) {
+    case 'SET_MODE':
+      // If we're already in this mode, don't do anything
+      if (action.payload.mode === state.gameMode) {
+        return state;
+      }
+
+      // Create a copy of the state
+      const newState = { ...state };
+
+      // First, save the current grid size to the appropriate mode-specific state
+      // Only if we have a current mode (not undefined)
+      if (state.gameMode === 'zen') {
+        newState.zenGridSize = state.currentGridSize;
+      } else if (state.gameMode === 'classic') {
+        newState.classicGridSize = state.currentGridSize;
+      }
+
+      // Now set the new mode
+      newState.gameMode = action.payload.mode;
+
+      // Then set the current grid size based on the new mode
+      if (action.payload.mode === 'zen') {
+        newState.currentGridSize = newState.zenGridSize;
+      } else if (action.payload.mode === 'classic') {
+        newState.currentGridSize = newState.classicGridSize;
+      }
+
+      return newState;
+
+    case 'SET_GRID_SIZE':
+      // Always update the current grid size
+      const updatedState = { ...state, currentGridSize: action.payload.size };
+
+      // Also update the mode-specific size
+      if (state.gameMode === 'zen') {
+        updatedState.zenGridSize = action.payload.size;
+      } else if (state.gameMode === 'classic') {
+        updatedState.classicGridSize = action.payload.size;
+      }
+
+      return updatedState;
+
+    case 'INITIALIZE':
+      // Initialize with default values
+      return {
+        gameMode: 'classic', // Set classic as default mode immediately
+        zenGridSize: action.payload.defaultSize,
+        classicGridSize: action.payload.defaultSize,
+        currentGridSize: action.payload.defaultSize
+      };
+
+    default:
+      return state;
+  }
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [zenGridSize, setZenGridSize] = useState(GRID_PROGRESSION[0]);
-  const [classicGridSize, setClassicGridSize] = useState(GRID_PROGRESSION[0]);
-  const [gridSize, setGridSize] = useState(GRID_PROGRESSION[0]);
+  // Track initialization
+  const isInitialized = useRef(false);
+
+  // Use reducer for game mode and grid size state
+  const [gameModeState, dispatchGameMode] = useReducer(
+    gameModeReducer,
+    {
+      gameMode: undefined,
+      zenGridSize: GRID_PROGRESSION[0],
+      classicGridSize: GRID_PROGRESSION[0],
+      currentGridSize: GRID_PROGRESSION[0]
+    }
+  );
+
+  // Destructure values from the reducer state
+  const { gameMode, zenGridSize, classicGridSize, currentGridSize } = gameModeState;
+
+  // Other state variables
   const [nextGridSize, setNextGridSize] = useState<number | null>(null);
   const [grid, setGrid] = useState<CellState[][]>(generateSolvedGrid(GRID_PROGRESSION[0]));
   const [hints, setHints] = useState(GRID_PROGRESSION[0]);
@@ -51,47 +140,88 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [hintUsageCount, setHintUsageCount] = useState(0);
   const [consecutiveWins, setConsecutiveWins] = useState(0);
-  const [gameMode, setGameMode] = useState<'classic' | 'zen' | undefined>(undefined);
   const [shouldResetConsecutiveWins, setShouldResetConsecutiveWins] = useState(false);
 
-  const initializeGame = useCallback(() => {
-    setMessage("");
-    setIsLoading(true);
-    setGameOver(false);
-    setGameWon(false);
+  // Initialize the game state
+  useEffect(() => {
+    if (!isInitialized.current) {
+      // Initialize the game mode state
+      dispatchGameMode({
+        type: 'INITIALIZE',
+        payload: { defaultSize: GRID_PROGRESSION[0] }
+      });
 
-    // Reset consecutive wins when starting a new game in classic mode
-    // but only if we're explicitly flagged to do so (after level progression)
-    if (gameMode === 'classic') {
-      if (shouldResetConsecutiveWins) {
-        setConsecutiveWins(0);
-        setShouldResetConsecutiveWins(false);
-      }
+      isInitialized.current = true;
+    }
+  }, []);
+
+  // Generate grid when needed
+  useEffect(() => {
+    // Only generate grid after we have a game mode
+    if (isInitialized.current && gameMode) {
+      generateNewGrid();
+    }
+  }, [isInitialized.current, gameMode]);
+
+  // Custom setGameMode using the reducer
+  const customSetGameMode = useCallback((mode: 'classic' | 'zen') => {
+    // Don't do anything if we're already in this mode
+    if (mode === gameMode) {
+      return;
     }
 
-    let gameInitSize;
+    // Dispatch the mode change action
+    dispatchGameMode({ type: 'SET_MODE', payload: { mode } });
+
+    // Reset game state but don't generate a new grid
+    setGameOver(false);
+    setGameWon(false);
+    setMessage("");
+
+    // Reset consecutive wins when entering classic mode from a different mode
+    if (mode === 'classic' && gameMode !== 'classic') {
+      setConsecutiveWins(0);
+    }
+  }, [gameMode]);
+
+  // Custom setGridSize using the reducer
+  const customSetGridSize = useCallback((size: number) => {
+    dispatchGameMode({ type: 'SET_GRID_SIZE', payload: { size } });
+  }, []);
+
+  // Unified grid generation function
+  const generateNewGrid = useCallback(() => {
+    if (!gameMode) {
+      return; // Don't generate if game mode isn't set yet
+    }
+
+    setIsLoading(true);
+
+    // Determine the grid size to use
+    let gameInitSize = currentGridSize;
 
     // Apply the next grid size if available (for classic mode)
     if (gameMode === 'classic' && nextGridSize !== null) {
-      setClassicGridSize(nextGridSize);
       gameInitSize = nextGridSize;
-      setNextGridSize(null); // Clear the pending grid size change
-    } else {
-      // For classic mode, use the stored classic grid size
-      // For zen mode, use the stored zen grid size
-      gameInitSize = gameMode === 'classic'
-        ? (classicGridSize || GRID_PROGRESSION[0])
-        : (zenGridSize || GRID_PROGRESSION[0]);
+
+      // Update grid size state
+      dispatchGameMode({ type: 'SET_GRID_SIZE', payload: { size: nextGridSize } });
+
+      // Clear the pending grid size change
+      setNextGridSize(null);
     }
 
-    // Update grid size and hints
-    setGridSize(gameInitSize);
+    // Reset consecutive wins when starting a new game in classic mode
+    // but only if we're explicitly flagged to do so (after level progression)
+    if (gameMode === 'classic' && shouldResetConsecutiveWins) {
+      setConsecutiveWins(0);
+      setShouldResetConsecutiveWins(false);
+    }
+
+    // Update hints
     setHints(gameInitSize);
 
-    // Regenerate the grid with the correct size
-    const newGrid = generateSolvedGrid(gameInitSize);
-    setGrid(newGrid);
-
+    // Generate the grid with the worker
     const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
 
     worker.onmessage = (event: MessageEvent) => {
@@ -129,124 +259,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
     };
 
     worker.postMessage({ type: "generateGrid", size: gameInitSize });
-  }, [zenGridSize, classicGridSize, gameMode, nextGridSize, shouldResetConsecutiveWins, gameWon]);
+  }, [currentGridSize, nextGridSize, gameMode, shouldResetConsecutiveWins]);
 
-  // Custom setGameMode to handle grid size preservation
-  const customSetGameMode = useCallback((mode: 'classic' | 'zen') => {
-    // If we're already in this mode, don't do anything to avoid resetting progress
-    if (gameMode === mode) {
-      return;
-    }
+  const initializeGame = useCallback(() => {
+    setMessage("");
+    setGameOver(false);
+    setGameWon(false);
 
-    if (gameMode === 'zen' && mode === 'classic') {
-      setZenGridSize(gridSize);
-    } else if (gameMode === 'classic' && mode === 'zen') {
-      setClassicGridSize(gridSize);
-    }
-
-    // Then set the game mode
-    setGameMode(mode);
-
-    // For zen mode, we still want to automatically initialize a new game
-    if (mode === 'zen') {
-      // Use the stored zen grid size
-      const zenSize = zenGridSize || GRID_PROGRESSION[0];
-
-      setGridSize(zenSize);
-      setZenGridSize(zenSize);
-
-      // Initialize game with zen settings
-      const newGrid = generateSolvedGrid(zenSize);
-      setGrid(newGrid);
-      setHints(zenSize);
-      setMessage("");
-      setIsLoading(true);
-      setGameOver(false);
-      setGameWon(false);
-
-      // Initialize game with specific size
-      const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
-
-      worker.onmessage = (event: MessageEvent) => {
-        if (event.data.error) {
-          console.error("Error from worker:", event.data.error);
-          setMessage("Failed to generate grid.");
-        } else {
-          const cellStates: CellState[][] = event.data.grid;
-
-          // Double-check grid size from worker
-          if (!cellStates || cellStates.length !== zenSize || cellStates[0].length !== zenSize) {
-            setMessage("Failed to generate grid.");
-            return;
-          }
-
-          setGrid(cellStates);
-          const componentGrid = event.data.componentGrid;
-          worker.postMessage({
-            type: "generatePuzzle",
-            filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
-            componentGrid,
-          });
-        }
-        setIsLoading(false);
-        worker.terminate();
-      };
-
-      worker.onerror = (error) => {
-        setMessage("Failed to generate grid.");
-        setIsLoading(false);
-        worker.terminate();
-      };
-
-      worker.postMessage({ type: "generateGrid", size: zenSize });
-    } else if (mode === 'classic') {
-      // For classic mode, just update the grid size and other settings
-      // but don't automatically start a new game
-      const classicSize = gameMode === 'classic' ? classicGridSize : GRID_PROGRESSION[0];
-
-      setGridSize(classicSize);
-      setClassicGridSize(classicSize);
-
-      // Only reset consecutive wins when first entering classic mode
-      if (gameMode !== 'classic') {
-        setConsecutiveWins(0);
-      }
-
-      // Don't automatically start a new game in classic mode
-      // The user will need to click the "New Game" button
-    }
-  }, [gameMode, gridSize, zenGridSize, classicGridSize, GRID_PROGRESSION, setZenGridSize, setClassicGridSize, setGridSize, setGameMode, setConsecutiveWins, setGrid, setHints, setMessage, setIsLoading, setGameOver, setGameWon, generateSolvedGrid]);
-
-  // Modify setGridSize to update the appropriate mode-specific grid size
-  const customSetGridSize = useCallback((size: number) => {
-    if (gameMode === 'zen') {
-      // Update both zen grid size and current grid size
-      setZenGridSize(size);
-      setGridSize(size);
-
-      // Reinitialize game with the new grid size
-      initializeGame();
-    } else if (gameMode === 'classic') {
-      // Update both classic grid size and current grid size
-      setClassicGridSize(size);
-      setGridSize(size);
-
-      // Don't automatically reinitialize game in classic mode
-      // Let the user manually start a new game
-    } else {
-      // For other/undefined modes, just set the grid size
-      setGridSize(size);
-    }
-  }, [gameMode, zenGridSize, classicGridSize, gridSize, initializeGame]);
+    // Generate a new grid
+    generateNewGrid();
+  }, [generateNewGrid]);
 
   // New method to get the next grid size
   const getNextGridSize = useCallback(() => {
-    const currentIndex = GRID_PROGRESSION.indexOf(gridSize);
+    const currentIndex = GRID_PROGRESSION.indexOf(currentGridSize);
     if (currentIndex < GRID_PROGRESSION.length - 1) {
       return GRID_PROGRESSION[currentIndex + 1];
     }
-    return gridSize; // Stay at the current size if at the maximum
-  }, [gridSize]);
+    return currentGridSize; // Stay at the current size if at the maximum
+  }, [currentGridSize]);
 
   const incrementHintUsage = useCallback(() => {
     setHintUsageCount(prev => prev + 1);
@@ -267,7 +298,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     // Check if we've reached the max consecutive wins for progression
     if (newConsecutiveWins >= MAX_CONSECUTIVE_WINS_FOR_PROGRESSION) {
       // Automatically progress grid size if possible
-      const currentIndex = GRID_PROGRESSION.indexOf(gridSize);
+      const currentIndex = GRID_PROGRESSION.indexOf(currentGridSize);
 
       if (currentIndex >= 0 && currentIndex < GRID_PROGRESSION.length - 1) {
         const newNextGridSize = GRID_PROGRESSION[currentIndex + 1];
@@ -278,33 +309,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setMessage(`Level up!`);
         // Store the next grid size, but don't apply it yet
         setNextGridSize(newNextGridSize);
-
-        // Important: Do NOT update the actual grid size or call initializeGame() here
-      } else {
-        // Still increment wins even if we can't progress
-        setConsecutiveWins(newConsecutiveWins);
       }
-    } else {
-      // Just increment wins if we're not at the threshold yet
-      setConsecutiveWins(newConsecutiveWins);
     }
-  }, [gameMode, gridSize, consecutiveWins, MAX_CONSECUTIVE_WINS_FOR_PROGRESSION, GRID_PROGRESSION, setConsecutiveWins, setMessage, setShouldResetConsecutiveWins, setNextGridSize]);
+  }, [gameMode, currentGridSize, consecutiveWins]);
 
   const resetConsecutiveWins = useCallback(() => {
     // Only reset the consecutive win count, don't change the grid size
     setConsecutiveWins(0);
   }, []);
-
-  useEffect(() => {
-    // Only initialize the game on first mount, not when the game mode changes
-    if (!gameMode) {
-      initializeGame();
-    }
-  }, [initializeGame, gameMode]);
-
-  // Optional: Add a console log to debug mode setting
-  useEffect(() => {
-  }, [gameMode]);
 
   const value = {
     grid,
@@ -317,7 +329,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setGameWon,
     setMessage,
     isLoading,
-    gridSize,
+    gridSize: currentGridSize,
     setGridSize: customSetGridSize,
     hints,
     setHints,
@@ -329,17 +341,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
     handleCellClick: (row: number, col: number) => {
       // Skip if game already won or over
       if (gameWon || gameOver) {
-        return { newGrid: grid, gameOver, gameWon, message };
+        // Instead of skipping completely, allow clicking to start a new game
+        generateNewGrid();
+        setGameOver(false);
+        setGameWon(false);
+        setMessage("");
+        return { newGrid: grid, gameOver: false, gameWon: false, message: "" };
       }
 
-      const result = handleCellClick(grid, row, col, gridSize);
+      const result = handleCellClick(grid, row, col, currentGridSize);
 
       // Always update the grid
       setGrid(result.newGrid);
 
       // Handle game won condition
       if (result.gameWon) {
-
         // Set game state first
         setGameWon(true);
         setMessage(result.message || "Congratulations! You won!");
@@ -368,6 +384,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     gameMode,
     setGameMode: customSetGameMode,
     nextGridSize,
+    generateNewGrid,
   };
 
   return (
