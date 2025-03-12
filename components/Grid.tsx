@@ -21,40 +21,41 @@ const Grid: React.FC = () => {
     initializeGame();
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <Loader2 className="animate-spin h-10 w-10" />
-      </div>
-    )
-  }
-
-  if (!grid || grid.length === 0) {
-    return <div>No grid data available.</div>
-  }
-
   const isGameOver = gameOver || gameWon
 
+  // Create a consistent container for the grid regardless of state
   return (
-    <div
-      className={`grid grid-cols-1 p-2 max-w-2xl w-full mx-auto my-auto select-none ${isGameOver ? 'cursor-pointer' : ''}`}
-      onClick={isGameOver ? handleGameOverClick : undefined}
-    >
+    <div className="grid grid-cols-1 p-2 w-full mx-auto select-none">
       <div
-        className="grid w-full aspect-square max-w-[80vh] mx-auto text-black font-bold text-6xl"
-        style={{
-          gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
-        }}
+        className={`aspect-square ${isGameOver ? 'cursor-pointer' : ''}`}
+        onClick={isGameOver ? handleGameOverClick : undefined}
       >
-        {grid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => (
-            <Cell
-              key={`${rowIndex}-${colIndex}`}
-              cell={cell}
-              onClick={() => handleCellClick(rowIndex, colIndex)}
-              gridSize={gridSize}
-            />
-          ))
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <Loader2 className="animate-spin h-10 w-10" />
+          </div>
+        ) : !grid || grid.length === 0 ? (
+          <div className="flex justify-center items-center h-full">
+            No grid data available.
+          </div>
+        ) : (
+          <div
+            className="grid w-full h-full text-black font-bold text-6xl"
+            style={{
+              gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
+            }}
+          >
+            {grid.map((row, rowIndex) =>
+              row.map((cell, colIndex) => (
+                <Cell
+                  key={`${rowIndex}-${colIndex}`}
+                  cell={cell}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                  gridSize={gridSize}
+                />
+              ))
+            )}
+          </div>
         )}
       </div>
     </div>

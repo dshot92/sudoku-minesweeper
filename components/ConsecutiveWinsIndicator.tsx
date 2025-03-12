@@ -10,10 +10,16 @@ export default function ConsecutiveWinsIndicator() {
   const css_win = 'bg-foreground';
   const css_loss = 'border-4 border-foreground bg-background';
 
-  // Always return the component structure but with hidden class when not in classic mode
+  // Always render the component but control visibility with opacity instead of invisible
   return (
-    <div className={`w-full flex justify-center items-center ${gameMode !== 'classic' ? 'invisible' : ''}`}>
-      <div className="flex justify-center">
+    <div className="w-full flex justify-center items-center">
+      <div
+        className="flex justify-center transition-opacity duration-300"
+        style={{
+          opacity: gameMode === 'classic' ? 1 : 0,
+          marginTop: '0'
+        }}
+      >
         {Array.from({ length: maxConsecutiveWinsForProgression }, (_, index) => (
           <div
             key={index}
