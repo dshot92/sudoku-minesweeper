@@ -1,11 +1,14 @@
 'use client';
 
-import Link from 'next/link';
-import { GameProvider } from '@/contexts/GameContext';
 import { useGame } from '@/contexts/GameContext';
+import Link from 'next/link';
 
-function HomeContent() {
+export default function Home() {
   const { setGameMode } = useGame();
+
+  const handleModeSelect = (mode: 'zen' | 'classic') => {
+    setGameMode(mode);
+  };
 
   return (
     <main className="min-h-screen px-8 bg-background grid grid-rows-[auto_1fr] pt-16">
@@ -18,14 +21,14 @@ function HomeContent() {
         <div className="w-full max-w-md space-y-4 ">
           <Link
             href="/game/zen"
-            onClick={() => setGameMode('zen')}
+            onClick={() => handleModeSelect('zen')}
             className="block w-full p-4 text-center bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
           >
             Zen Mode
           </Link>
           <Link
             href="/game/classic"
-            onClick={() => setGameMode('classic')}
+            onClick={() => handleModeSelect('classic')}
             className="block w-full p-4 text-center bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
           >
             Classic Mode
@@ -33,13 +36,5 @@ function HomeContent() {
         </div>
       </div>
     </main>
-  );
-}
-
-export default function Home() {
-  return (
-    <GameProvider>
-      <HomeContent />
-    </GameProvider>
   );
 } 

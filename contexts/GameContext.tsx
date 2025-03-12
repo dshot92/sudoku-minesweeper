@@ -187,7 +187,56 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       worker.postMessage({ type: "generateGrid", size: classicSize });
     } else if (mode === 'zen') {
-      // Similar code for zen mode...
+      // Use the stored zen grid size
+      const zenSize = zenGridSize || GRID_PROGRESSION[0];
+      
+      setGridSize(zenSize);
+      setZenGridSize(zenSize);
+      
+      // Initialize game with zen settings
+      const newGrid = generateSolvedGrid(zenSize);
+      setGrid(newGrid);
+      setHints(zenSize);
+      setMessage("");
+      setIsLoading(true);
+      setGameOver(false);
+      setGameWon(false);
+      
+      // Initialize game with specific size
+      const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
+      
+      worker.onmessage = (event: MessageEvent) => {
+        if (event.data.error) {
+          console.error("Error from worker:", event.data.error);
+          setMessage("Failed to generate grid.");
+        } else {
+          const cellStates: CellState[][] = event.data.grid;
+          
+          // Double-check grid size from worker
+          if (!cellStates || cellStates.length !== zenSize || cellStates[0].length !== zenSize) {
+            setMessage("Failed to generate grid.");
+            return;
+          }
+          
+          setGrid(cellStates);
+          const componentGrid = event.data.componentGrid;
+          worker.postMessage({
+            type: "generatePuzzle",
+            filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
+            componentGrid,
+          });
+        }
+        setIsLoading(false);
+        worker.terminate();
+      };
+      
+      worker.onerror = (error) => {
+        setMessage("Failed to generate grid.");
+        setIsLoading(false);
+        worker.terminate();
+      };
+      
+      worker.postMessage({ type: "generateGrid", size: zenSize });
     }
   }, [gameMode, gridSize, zenGridSize, setZenGridSize, setClassicGridSize, setGridSize, setGameMode, setConsecutiveWins, classicGridSize, initializeGame]);
 
