@@ -11,15 +11,15 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen px-8 bg-background grid grid-rows-[auto_1fr] pt-16">
+    <main className="min-h-screen px-8 max-w-md mx-auto bg-background grid grid-rows-[auto_1fr] pt-16">
 
-      <div className="w-full max-w-md mx-auto">
+      <div className="w-full mx-auto">
         <h1 className="text-5xl font-bold">sudoku</h1>
         <h1 className="text-5xl font-bold">minesweeper</h1>
       </div>
 
       <div className="grid place-items-center">
-        <div className="w-full max-w-md space-y-10 ">
+        <div className="w-full space-y-4 ">
           <Link
             href="/game/zen"
             onClick={() => handleModeSelect('zen')}
