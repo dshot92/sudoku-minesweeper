@@ -7,7 +7,8 @@ import { CellState, generateSolvedGrid, handleCellClick } from '@/lib/sudoku-min
 export const GRID_PROGRESSION = [3, 4, 5, 6, 7, 8];
 export const MAX_CONSECUTIVE_WINS_FOR_PROGRESSION = 3;
 
-interface GameContextType {
+// Export the interface so it can be used by other components
+export interface GameContextType {
   grid: CellState[][];
   gameOver: boolean;
   gameWon: boolean;
@@ -110,7 +111,8 @@ function gameModeReducer(state: GameModeState, action: GameModeAction): GameMode
   }
 }
 
-const GameContext = createContext<GameContextType | undefined>(undefined);
+// Export the context so it can be used directly by other components
+export const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
   // Track initialization
