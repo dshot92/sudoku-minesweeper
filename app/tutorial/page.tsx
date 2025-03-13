@@ -44,21 +44,18 @@ const tutorialSteps = [
   },
   {
     title: "Game Modes",
-    content: `<div class="space-y-4">
-  <div class="bg-card p-4 rounded-lg ">
-    <h3 class="text-foreground font-bold text-lg mb-2">Zen Mode</h3>
+    content: `<div>
+    <h3 class="text-foreground font-bold text-lg ">Zen Mode</h3>
     <p class="text-foreground">
       Unlimited puzzles, zero stress. <span class="font-semibold">Jump between grid sizes</span>, experiment freely, and play at your own pace. 
       No tracking, no pressure - just pure puzzle solving.
     </p>
-  </div>
-  <div class="bg-card p-4 rounded-lg ">
-    <h3 class="text-foreground font-bold text-lg mb-2">Classic Mode</h3>
+    <br />
+    <h3 class="text-foreground font-bold text-lg ">Classic Mode</h3>
     <p class="text-foreground">
       A true test of skill. <span class="font-semibold">Start at 4×4 and climb the grid sizes</span>. 
       Win 3 games in a row to level up. New Game doesn't count against you - so push your limits without fear.
     </p>
-  </div>
 </div>`,
     showGrid: false,
     showButtons: true,
@@ -168,7 +165,7 @@ export default function TutorialPage() {
         </div>
 
         {/* Middle area - Grid or Game Mode Buttons */}
-        <div className="flex-1 flex items-center justify-center w-full">
+        <div className="flex-1 flex items-center justify-center w-full relative">
           <div className="max-w-2xl w-full px-4">
             {currentStep.showGrid ? (
               <TutorialGridWrapper
@@ -177,9 +174,9 @@ export default function TutorialPage() {
                 helpText={helpText}
               />
             ) : (
-              <div className="flex justify-center items-center min-h-[300px]">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md px-4">
                 {isLastStep && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
                     <Link href="/game/zen">
                       <Button size="lg" className="px-8 w-full">Zen Mode</Button>
                     </Link>
