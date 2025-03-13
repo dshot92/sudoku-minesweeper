@@ -9,7 +9,7 @@ import {
   TutorialCellState,
   generateNumbersGrid,
   generateMinesGrid,
-  generateRegionCompletionGrid,
+  // generateRegionCompletionGrid,
   generateWinningGrid
 } from '@/lib/tutorialGridGenerator';
 
