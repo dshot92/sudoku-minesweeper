@@ -7,15 +7,6 @@ export interface TutorialCellState {
   isHighlighted?: boolean;
 }
 
-// Helper function to shuffle an array
-function shuffleArray<T>(array: T[]): T[] {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
 // Create a valid 4x4 tutorial grid with predefined values for better teaching
 function createBaseTutorialGrid(): TutorialCellState[][] {
   // Use a predefined valid grid that clearly demonstrates the concepts
@@ -117,4 +108,4 @@ export const generateWinningGrid = (): TutorialCellState[][] => {
   }
 
   return grid;
-}; 
+};

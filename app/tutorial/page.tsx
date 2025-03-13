@@ -17,6 +17,8 @@ export default function TutorialPage() {
   const [step, setStep] = useState(0);
   const [grid, setGrid] = useState<TutorialCellState[][]>([]);
   const [helpText, setHelpText] = useState<string>("");
+  const [previousGrid, setPreviousGrid] = useState<TutorialCellState[][]>([]);
+  const [mineClicked, setMineClicked] = useState(false);
 
   const tutorialSteps = [
     {
@@ -69,7 +71,7 @@ export default function TutorialPage() {
       showButtons: true,
     }, {
       title: "Ready to Play?",
-      content: "Choose your path: <span class='font-semibold'>Zen Mode</span> for pure exploration, or <span class='font-semibold'>Classic Mode</span> to prove your puzzle mastery.",
+      content: "",
       showGrid: false,
       showButtons: true,
     },
@@ -80,17 +82,29 @@ export default function TutorialPage() {
 
   // Update grid when step changes
   useEffect(() => {
-    if (currentStep.gridGenerator) {
-      setGrid(currentStep.gridGenerator());
+    const currentTutorialStep = tutorialSteps[step];
+
+    if (currentTutorialStep.gridGenerator) {
+      const newGrid = currentTutorialStep.gridGenerator();
+      setGrid(newGrid);
+      setPreviousGrid(newGrid);
+      setMineClicked(false);
     }
 
     // Reset the help text to the default for this step
-    setHelpText(currentStep.helpTextDefault || "");
-  }, [step]);
+    setHelpText(currentTutorialStep.helpTextDefault || "");
+  }, [step]); // Only step is needed as a dependency
 
   const handleCellClick = (row: number, col: number) => {
     // Don't allow interaction on steps that don't need it
     if (step === 4 || step === 5) return;
+
+    if (mineClicked) {
+      // Reset the grid to previous state
+      setGrid(JSON.parse(JSON.stringify(previousGrid)));
+      setMineClicked(false);
+      return;
+    }
 
     // Don't allow clicking already revealed cells
     if (grid[row][col].revealed) return;
@@ -98,8 +112,14 @@ export default function TutorialPage() {
     const newGrid = JSON.parse(JSON.stringify(grid)); // Deep clone
     const clickedCell = newGrid[row][col];
 
-    // Reveal the clicked cell
-    clickedCell.revealed = true;
+    if (clickedCell.isMine) {
+      // Reveal all cells if a mine is clicked
+      newGrid.forEach(row => row.forEach(cell => cell.revealed = true));
+      setMineClicked(true);
+    } else {
+      // Just reveal the clicked cell
+      clickedCell.revealed = true;
+    }
 
     setGrid(newGrid);
   };
@@ -215,4 +235,4 @@ export default function TutorialPage() {
       </div >
     </div >
   );
-} 
+}
