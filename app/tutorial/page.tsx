@@ -48,6 +48,11 @@ export default function TutorialPage() {
       helpTextDefault: "Try to reveal all cells to win the game!",
     },
     {
+      title: "Modes",
+      content: "You can choose between Zen mode and Classic mode. Zen mode is a relaxed experience, while Classic mode is a challenge.",
+      showGrid: false,
+      showButtons: true,
+    }, {
       title: "Ready to Play?",
       content: "You're now ready to play Sudoku Minesweeper! Choose Zen mode for a relaxed experience or Classic mode for a challenge.",
       showGrid: false,
@@ -140,7 +145,7 @@ export default function TutorialPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background grid grid-rows-[72px_1fr]">
+    <div className="min-h-screen bg-background grid grid-rows-[auto_1fr]">
       <header className="w-full">
         <div className="container h-full p-4 grid grid-cols-[auto_1fr_auto] gap-4 items-center">
           <Link href="/">
@@ -154,11 +159,11 @@ export default function TutorialPage() {
         </div>
       </header>
 
-      <div className="grid grid-rows-[1fr_2fr_1fr] px-4 max-w-2xl mx-auto w-full">
+      <div className="h-full grid grid-rows-[auto_1fr_auto] gap-4 px-4 pb-8 w-full">
         {/* Top area - Instructions */}
-        <div className="grid place-items-center">
+        <div className="max-w-2xl mx-auto w-full">
           {!isLastStep && (
-            <div className="bg-card p-4 rounded-lg w-full min-h-[120px] grid content-start">
+            <div className="bg-card p-4 rounded-lg w-full grid content-start">
               <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
               <p className="text-muted-foreground">{currentStep.content}</p>
             </div>
@@ -167,7 +172,7 @@ export default function TutorialPage() {
 
         {/* Middle area - Grid or Ready to Play */}
         <div className="grid place-items-center w-full">
-          <div className="w-full">
+          <div className="max-w-2xl w-full">
             {isLastStep ? (
               <div className="bg-card p-4 rounded-lg w-full grid content-start gap-4">
                 <h2 className="text-2xl font-bold">{tutorialSteps[tutorialSteps.length - 1].title}</h2>
@@ -189,22 +194,19 @@ export default function TutorialPage() {
                 helpText={helpText}
               />
             ) : (
-              <div className="text-muted-foreground text-left">
-                {step === 0 ? "Welcome to Sudoku Minesweeper!" : "Let's play!"}
-              </div>
+              <></>
             )}
           </div>
         </div>
 
         {/* Bottom area - Navigation buttons */}
-        <div className="grid place-items-center">
+        <div className="w-full">
           {!isLastStep && (
-            <div className="grid grid-cols-2 gap-4 w-full">
+            <div className="grid grid-cols-[200px_200px] gap-4 mx-auto w-fit">
               <Button
                 onClick={prevStep}
                 disabled={step === 0}
-                variant="outline"
-                className="grid grid-flow-col gap-2 border-foreground"
+                className="grid grid-flow-col gap-2 bg-background text-foreground border-2 border-foreground rounded-lg"
               >
                 <ChevronLeft size={18} />
                 Previous
@@ -212,7 +214,7 @@ export default function TutorialPage() {
 
               <Button
                 onClick={nextStep}
-                className="grid grid-flow-col gap-2"
+                className="grid grid-flow-col gap-2 bg-foreground text-background rounded-lg"
               >
                 Next
                 <ChevronRight size={18} />
