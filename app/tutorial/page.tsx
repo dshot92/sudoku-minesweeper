@@ -155,56 +155,40 @@ export default function TutorialPage() {
         {/* Top area - Instructions */}
         <div className="max-w-2xl mx-auto w-full px-4">
           <div className="bg-card p-4 rounded-lg w-full min-h-[120px] flex flex-col justify-center">
-            {!isLastStep ? (
-              <>
-                <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
-                {currentStep.content.startsWith('<') ? (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: currentStep.content }}
-                    className="text-muted-foreground"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">{currentStep.content}</p>
-                )}
-              </>
+            <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
+            {currentStep.content.startsWith('<') ? (
+              <div
+                dangerouslySetInnerHTML={{ __html: currentStep.content }}
+                className="text-muted-foreground"
+              />
             ) : (
-              <div /> /* Empty div for last step */
+              <p className="text-muted-foreground">{currentStep.content}</p>
             )}
           </div>
         </div>
 
-        {/* Middle area - Grid or Ready to Play */}
-        <div className="flex-1 flex items-center justify-center w-full min-h-[400px]">
+        {/* Middle area - Grid or Game Mode Buttons */}
+        <div className="flex-1 flex items-center justify-center w-full">
           <div className="max-w-2xl w-full px-4">
-            {isLastStep ? (
-              <div className="bg-card p-4 rounded-lg w-full grid content-start gap-4">
-                <h2 className="text-2xl font-bold">{tutorialSteps[tutorialSteps.length - 1].title}</h2>
-                {currentStep.content.startsWith('<') ? (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: currentStep.content }}
-                    className="text-muted-foreground"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">{currentStep.content}</p>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <Link href="/game/zen">
-                    <Button size="lg" className="px-8 w-full">Zen Mode</Button>
-                  </Link>
-                  <Link href="/game/classic">
-                    <Button size="lg" className="px-8 w-full">Classic Mode</Button>
-                  </Link>
-                </div>
-              </div>
-            ) : currentStep.showGrid ? (
+            {currentStep.showGrid ? (
               <TutorialGridWrapper
                 tutorialGrid={grid}
                 onCellClick={handleCellClick}
                 helpText={helpText}
               />
             ) : (
-              <></>
+              <div className="flex justify-center items-center min-h-[300px]">
+                {isLastStep && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md">
+                    <Link href="/game/zen">
+                      <Button size="lg" className="px-8 w-full">Zen Mode</Button>
+                    </Link>
+                    <Link href="/game/classic">
+                      <Button size="lg" className="px-8 w-full">Classic Mode</Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -235,7 +219,7 @@ export default function TutorialPage() {
             )}
           </div>
         </footer>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 }
