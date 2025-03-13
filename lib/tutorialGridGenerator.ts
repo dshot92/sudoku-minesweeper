@@ -4,77 +4,117 @@ export interface TutorialCellState {
   revealed: boolean;
   isMine: boolean;
   componentId: number;
+  isHighlighted?: boolean;
 }
 
-// Create a valid 4x4 Sudoku Minesweeper grid
-const createBaseTutorialGrid = (): TutorialCellState[][] => {
-  return [
-    [
-      { value: 3, revealed: true, isMine: false, componentId: 0 },
-      { value: 4, revealed: true, isMine: true, componentId: 0 },
-      { value: 2, revealed: true, isMine: false, componentId: 1 },
-      { value: 1, revealed: true, isMine: false, componentId: 1 },
-    ],
-    [
-      { value: 4, revealed: true, isMine: true, componentId: 2 },
-      { value: 1, revealed: true, isMine: false, componentId: 0 },
-      { value: 3, revealed: true, isMine: false, componentId: 3 },
-      { value: 2, revealed: true, isMine: false, componentId: 1 },
-    ],
-    [
-      { value: 1, revealed: true, isMine: false, componentId: 2 },
-      { value: 2, revealed: true, isMine: false, componentId: 3 },
-      { value: 4, revealed: true, isMine: true, componentId: 3 },
-      { value: 3, revealed: true, isMine: false, componentId: 1 },
-    ],
-    [
-      { value: 2, revealed: true, isMine: false, componentId: 2 },
-      { value: 3, revealed: true, isMine: false, componentId: 2 },
-      { value: 1, revealed: true, isMine: false, componentId: 3 },
-      { value: 4, revealed: true, isMine: true, componentId: 1 },
-    ],
-  ];
-};
+// Helper function to shuffle an array
+function shuffleArray<T>(array: T[]): T[] {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
 
-// Generate grid for the "numbers" step - reveal some numbers
+// Create a valid 4x4 tutorial grid with predefined values for better teaching
+function createBaseTutorialGrid(): TutorialCellState[][] {
+  // Use a predefined valid grid that clearly demonstrates the concepts
+  const values = [
+    [2, 4, 1, 3],
+    [3, 1, 4, 2],
+    [1, 2, 3, 4],
+    [4, 3, 2, 1]
+  ];
+
+  const componentIds = [
+    [0, 0, 1, 1],
+    [0, 0, 1, 1],
+    [2, 2, 3, 3],
+    [2, 2, 3, 3]
+  ];
+
+  return values.map((row, rowIndex) =>
+    row.map((value, colIndex) => ({
+      value,
+      revealed: false,
+      isMine: value === 4, // In a 4x4 grid, 4 is always a mine
+      componentId: componentIds[rowIndex][colIndex],
+      isHighlighted: false
+    }))
+  );
+}
+
+// Generate grid for the "numbers" step - reveal strategic numbers
 export const generateNumbersGrid = (): TutorialCellState[][] => {
   const grid = createBaseTutorialGrid();
-  // Reveal all cells
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < 4; c++) {
-      grid[r][c].revealed = true;
-    }
-  }
+
+  // Reveal numbers in a pattern that demonstrates row/column uniqueness
+  // Reveal two numbers in first row and their corresponding column numbers
+  grid[0][0].revealed = true; // Show 2
+  grid[0][2].revealed = true; // Show 1
+  grid[1][0].revealed = true; // Show 3
+  grid[2][2].revealed = true; // Show 3
+
+  // Highlight the revealed cells to show the pattern
+  grid[0][0].isHighlighted = true;
+  grid[0][2].isHighlighted = true;
+  grid[1][0].isHighlighted = true;
+  grid[2][2].isHighlighted = true;
+
   return grid;
 };
 
-// Generate grid for the "mines" step - reveal all mines
+// Generate grid for the "mines" step - strategically reveal mines
 export const generateMinesGrid = (): TutorialCellState[][] => {
   const grid = createBaseTutorialGrid();
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < 4; c++) {
+
+  // Reveal one complete region to show how mines work
+  for (let r = 0; r < 2; r++) {
+    for (let c = 0; c < 2; c++) {
+      grid[r][c].revealed = true;
       if (grid[r][c].isMine) {
-        grid[r][c].revealed = true;
+        grid[r][c].isHighlighted = true;
       }
     }
   }
+
+  // Also reveal one mine in another region to reinforce the pattern
+  grid[2][3].revealed = true;
+  grid[2][3].isHighlighted = true;
+
   return grid;
 };
 
-// Generate grid for the "region completion" step - reveal region 0
+// Generate grid for the "region completion" step
 export const generateRegionCompletionGrid = (): TutorialCellState[][] => {
   const grid = createBaseTutorialGrid();
+
+  // Focus on the top-right region (componentId 1)
+  for (let r = 0; r < 2; r++) {
+    for (let c = 2; c < 4; c++) {
+      if (!grid[r][c].isMine) {
+        grid[r][c].revealed = true;
+      }
+      grid[r][c].isHighlighted = true;
+    }
+  }
+
+  return grid;
+};
+
+// Generate grid for "winning the game" - partially revealed grid
+export const generateWinningGrid = (): TutorialCellState[][] => {
+  const grid = createBaseTutorialGrid();
+
+  // Reveal most cells except for a few strategic ones
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
-      if (grid[r][c].componentId === 0) {
+      // Leave one non-mine cell and its corresponding mine unrevealed in one region
+      if (!(r === 0 && c === 2) && !(r === 0 && c === 3)) {
         grid[r][c].revealed = true;
       }
     }
   }
-  return grid;
-};
 
-// Generate grid for "winning the game" - empty grid for user to try to reveal all
-export const generateWinningGrid = (): TutorialCellState[][] => {
-  return createBaseTutorialGrid();
+  return grid;
 }; 

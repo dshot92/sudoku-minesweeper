@@ -21,40 +21,55 @@ export default function TutorialPage() {
   const tutorialSteps = [
     {
       title: "The Basics",
-      content: "Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. Continue exploring the grid!",
+      content: "Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers can't repeat in rows or columns. Try revealing more cells!",
       showGrid: true,
       gridGenerator: generateNumbersGrid,
-      helpTextDefault: "Each row and column also contains numbers 1-4, just like Sudoku.",
+      helpTextDefault: "Click on unrevealed cells to discover more numbers. Notice how each number appears exactly once in each row and column.",
     },
     {
       title: "The Mines",
-      content: "Each colored region contains exactly one mine. The mine is always the highest number in that region. Notice that in this 4x4 grid, the number 4 is always a mine.",
+      content: "Each colored region contains exactly one mine. The mine is always the highest number in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!",
       showGrid: true,
       gridGenerator: generateMinesGrid,
-      helpTextDefault: "In each region, the number 4 is always a mine.",
+      helpTextDefault: "Click on unrevealed cells in the partially revealed regions to see how numbers work with mines.",
     },
     {
       title: "Region Completion",
-      content: "When you reveal all non-mine cells in a region, the mine is automatically revealed safely. Try clicking on the remaining unrevealed cells in the highlighted region.",
+      content: "When you reveal all non-mine cells in a region, the mine is automatically revealed safely. This region shows where you can try this - reveal the remaining cells to see what happens!",
       showGrid: true,
       gridGenerator: generateRegionCompletionGrid,
-      helpTextDefault: "When all non-mine cells in a region are revealed, the mine is automatically revealed safely.",
+      helpTextDefault: "Click on the remaining unrevealed cells to safely reveal the mine.",
     },
     {
       title: "Winning the Game",
-      content: "You win when all cells (including mines) are revealed. In Classic mode, win 3 times to progress to a larger grid! Try to reveal all cells to see what happens.",
+      content: "You win when all cells (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.",
       showGrid: true,
       gridGenerator: generateWinningGrid,
-      helpTextDefault: "Try to reveal all cells to win the game!",
+      helpTextDefault: "Use what you've learned about mines and regions to reveal all cells safely!",
     },
     {
-      title: "Modes",
-      content: "You can choose between Zen mode and Classic mode. Zen mode is a relaxed experience, while Classic mode is a challenge.",
+      title: "Game Modes",
+      content: `<div class="space-y-4">
+  <div class="bg-card p-4 rounded-lg ">
+    <h3 class="text-foreground font-bold text-lg mb-2">Zen Mode</h3>
+    <p class="text-foreground">
+      Unlimited puzzles, zero stress. <span class="font-semibold">Jump between grid sizes</span>, experiment freely, and play at your own pace. 
+      No tracking, no pressure - just pure puzzle solving.
+    </p>
+  </div>
+  <div class="bg-card p-4 rounded-lg ">
+    <h3 class="text-foreground font-bold text-lg mb-2">Classic Mode</h3>
+    <p class="text-foreground">
+      A true test of skill. <span class="font-semibold">Start at 4×4 and climb the grid sizes</span>. 
+      Win 3 games in a row to level up. New Game doesn't count against you - so push your limits without fear.
+    </p>
+  </div>
+</div>`,
       showGrid: false,
       showButtons: true,
     }, {
       title: "Ready to Play?",
-      content: "You're now ready to play Sudoku Minesweeper! Choose Zen mode for a relaxed experience or Classic mode for a challenge.",
+      content: "Choose your path: <span class='font-semibold'>Zen Mode</span> for pure exploration, or <span class='font-semibold'>Classic Mode</span> to prove your puzzle mastery.",
       showGrid: false,
       showButtons: true,
     },
@@ -74,60 +89,17 @@ export default function TutorialPage() {
   }, [step]);
 
   const handleCellClick = (row: number, col: number) => {
-    // Don't allow interaction on steps that are just for display
-    if (step === 2 || step === 5) return;
+    // Don't allow interaction on steps that don't need it
+    if (step === 4 || step === 5) return;
 
     // Don't allow clicking already revealed cells
     if (grid[row][col].revealed) return;
 
     const newGrid = JSON.parse(JSON.stringify(grid)); // Deep clone
+    const clickedCell = newGrid[row][col];
 
     // Reveal the clicked cell
-    newGrid[row][col].revealed = true;
-
-    // If it's a mine, show a message
-    if (newGrid[row][col].isMine) {
-      setHelpText("You revealed a mine! In a real game, this would end the game.");
-    }
-
-    // Check if all non-mine cells in this component are revealed
-    const componentId = newGrid[row][col].componentId;
-    let allNonMinesInComponentRevealed = true;
-    let minePosition: { row: number, col: number } | null = null;
-
-    // Find all cells in this component
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
-        if (newGrid[r][c].componentId === componentId) {
-          if (newGrid[r][c].isMine) {
-            minePosition = { row: r, col: c };
-          } else if (!newGrid[r][c].revealed) {
-            allNonMinesInComponentRevealed = false;
-          }
-        }
-      }
-    }
-
-    // If all non-mine cells in the component are revealed, reveal the mine too
-    if (allNonMinesInComponentRevealed && minePosition) {
-      newGrid[minePosition.row][minePosition.col].revealed = true;
-      setHelpText("Great! You revealed all non-mine cells in this region, so the mine is automatically revealed safely.");
-    }
-
-    // Check if all cells are revealed (win condition)
-    let allRevealed = true;
-    for (let r = 0; r < 4; r++) {
-      for (let c = 0; c < 4; c++) {
-        if (!newGrid[r][c].revealed) {
-          allRevealed = false;
-          break;
-        }
-      }
-    }
-
-    if (allRevealed) {
-      setHelpText("Congratulations! You've revealed all cells and won the game!");
-    }
+    clickedCell.revealed = true;
 
     setGrid(newGrid);
   };
@@ -145,8 +117,8 @@ export default function TutorialPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background grid grid-rows-[auto_1fr]">
-      <header className="w-full">
+    <div className="bg-background min-h-screen flex flex-col overflow-x-hidden">
+      <header className="w-full flex-shrink-0">
         <div className="container h-full p-4 grid grid-cols-[auto_1fr_auto] gap-4 items-center">
           <Link href="/">
             <Button variant="outline" className="grid grid-flow-col gap-2 border-foreground">
@@ -159,26 +131,44 @@ export default function TutorialPage() {
         </div>
       </header>
 
-      <div className="h-full grid grid-rows-[auto_1fr_auto] gap-4 px-4 pb-8 w-full">
+      <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
         {/* Top area - Instructions */}
-        <div className="max-w-2xl mx-auto w-full">
-          {!isLastStep && (
-            <div className="bg-card p-4 rounded-lg w-full grid content-start">
-              <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
-              <p className="text-muted-foreground">{currentStep.content}</p>
-            </div>
-          )}
+        <div className="max-w-2xl mx-auto w-full px-4">
+          <div className="bg-card p-4 rounded-lg w-full min-h-[120px] flex flex-col justify-center">
+            {!isLastStep ? (
+              <>
+                <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
+                {currentStep.content.startsWith('<') ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: currentStep.content }}
+                    className="text-muted-foreground"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">{currentStep.content}</p>
+                )}
+              </>
+            ) : (
+              <div /> /* Empty div for last step */
+            )}
+          </div>
         </div>
 
         {/* Middle area - Grid or Ready to Play */}
-        <div className="grid place-items-center w-full">
-          <div className="max-w-2xl w-full">
+        <div className="flex-1 flex items-center justify-center w-full min-h-[400px]">
+          <div className="max-w-2xl w-full px-4">
             {isLastStep ? (
               <div className="bg-card p-4 rounded-lg w-full grid content-start gap-4">
                 <h2 className="text-2xl font-bold">{tutorialSteps[tutorialSteps.length - 1].title}</h2>
-                <p className="text-muted-foreground">{tutorialSteps[tutorialSteps.length - 1].content}</p>
+                {currentStep.content.startsWith('<') ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: currentStep.content }}
+                    className="text-muted-foreground"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">{currentStep.content}</p>
+                )}
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Link href="/game/zen">
                     <Button size="lg" className="px-8 w-full">Zen Mode</Button>
                   </Link>
@@ -200,13 +190,13 @@ export default function TutorialPage() {
         </div>
 
         {/* Bottom area - Navigation buttons */}
-        <div className="w-full">
+        <div className="w-full flex-shrink-0 pb-8 p-2">
           {!isLastStep && (
-            <div className="grid grid-cols-[200px_200px] gap-4 mx-auto w-fit">
+            <div className="flex p-4 flex-row gap-4 justify-center px-4">
               <Button
                 onClick={prevStep}
                 disabled={step === 0}
-                className="grid grid-flow-col gap-2 bg-background text-foreground border-2 border-foreground rounded-lg"
+                className="grid grid-flow-col gap-2 bg-background text-foreground border-2 border-foreground rounded-lg w-[150px]"
               >
                 <ChevronLeft size={18} />
                 Previous
@@ -214,7 +204,7 @@ export default function TutorialPage() {
 
               <Button
                 onClick={nextStep}
-                className="grid grid-flow-col gap-2 bg-foreground text-background rounded-lg"
+                className="grid grid-flow-col gap-2 bg-foreground text-background rounded-lg w-[150px]"
               >
                 Next
                 <ChevronRight size={18} />
@@ -222,7 +212,7 @@ export default function TutorialPage() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 } 

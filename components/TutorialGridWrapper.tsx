@@ -22,7 +22,8 @@ const adaptTutorialGridToCellState = (tutorialGrid: TutorialCellState[][]): Cell
   return tutorialGrid.map(row =>
     row.map(cell => ({
       ...cell,
-      // Any additional properties CellState might need that TutorialCellState doesn't have
+      isHighlighted: cell.isHighlighted || false,
+      // Add any additional properties CellState might need
     } as CellState))
   );
 };
@@ -42,7 +43,7 @@ export default function TutorialGridWrapper({
     gameOver: false,
     gameWon: false,
     isLoading: false,
-    message: "",
+    message: helpText, // Use the helpText as the message
     initializeGame: () => { },
     setGrid: () => { },
     setGameOver: () => { },
@@ -62,7 +63,7 @@ export default function TutorialGridWrapper({
         newGrid: adaptedGrid,
         gameOver: false,
         gameWon: false,
-        message: ""
+        message: helpText
       };
     },
     gridProgression: GRID_PROGRESSION,
@@ -75,8 +76,10 @@ export default function TutorialGridWrapper({
   };
 
   return (
-    <GameContext.Provider value={contextValue}>
-      <Grid />
-    </GameContext.Provider>
+
+      <GameContext.Provider value={contextValue}>
+        <Grid />
+      </GameContext.Provider>
+
   );
 } 
