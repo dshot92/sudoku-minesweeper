@@ -114,7 +114,7 @@ export default function TutorialPage() {
 
     if (clickedCell.isMine) {
       // Reveal all cells if a mine is clicked
-      newGrid.forEach(row => row.forEach(cell => cell.revealed = true));
+      newGrid.forEach((row: TutorialCellState[]) => row.forEach((cell: TutorialCellState) => cell.revealed = true));
       setMineClicked(true);
     } else {
       // Just reveal the clicked cell
@@ -141,13 +141,13 @@ export default function TutorialPage() {
       <header className="w-full flex-shrink-0">
         <div className="container h-full p-4 grid grid-cols-[auto_1fr_auto] gap-4 items-center">
           <Link href="/">
-            <Button variant="outline" className="grid grid-flow-col gap-2 border-foreground">
-              <Home size={18} />
+            <Button variant="outline" className="grid grid-flow-col gap-2 border-foreground w-[42px] h-[42px] p-0">
+              <Home size={24} />
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold">How to Play</h1>
+          <h1 className="text-2xl font-bold text-center">How to Play</h1>
           {/* Spacer for alignment */}
-          <div className="w-[40px]"></div>
+          <div className="w-[42px]"></div>
         </div>
       </header>
 
