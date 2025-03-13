@@ -17,7 +17,7 @@ export function GameAlert() {
           marginBottom: '0'
         }}
       >
-        <AlertDescription>{message || "Game message will appear here"}</AlertDescription>
+        <AlertDescription>{message}</AlertDescription>
       </Alert>
     </div>
   )
