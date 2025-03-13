@@ -73,6 +73,7 @@ export default function TutorialGridWrapper({
     setGameMode: () => { },
     nextGridSize: null,
     generateNewGrid: () => { },
+    isNewGridCreated: false,
   };
 
   return (
