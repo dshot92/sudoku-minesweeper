@@ -13,45 +13,38 @@ import {
   generateWinningGrid
 } from '@/lib/tutorialGridGenerator';
 
-export default function TutorialPage() {
-  const [step, setStep] = useState(0);
-  const [grid, setGrid] = useState<TutorialCellState[][]>([]);
-  const [helpText, setHelpText] = useState<string>("");
-  const [previousGrid, setPreviousGrid] = useState<TutorialCellState[][]>([]);
-  const [mineClicked, setMineClicked] = useState(false);
-
-  const tutorialSteps = [
-    {
-      title: "The Basics",
-      content: "Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers can't repeat in rows or columns. Try revealing more cells!",
-      showGrid: true,
-      gridGenerator: generateNumbersGrid,
-      helpTextDefault: "Click on unrevealed cells to discover more numbers. Notice how each number appears exactly once in each row and column.",
-    },
-    {
-      title: "The Mines",
-      content: "Each colored region contains exactly one mine. The mine is always the highest number in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!",
-      showGrid: true,
-      gridGenerator: generateMinesGrid,
-      helpTextDefault: "Click on unrevealed cells in the partially revealed regions to see how numbers work with mines.",
-    },
-    {
-      title: "Region Completion",
-      content: "When you reveal all non-mine cells in a region, the mine is automatically revealed safely. This region shows where you can try this - reveal the remaining cells to see what happens!",
-      showGrid: true,
-      gridGenerator: generateRegionCompletionGrid,
-      helpTextDefault: "Click on the remaining unrevealed cells to safely reveal the mine.",
-    },
-    {
-      title: "Winning the Game",
-      content: "You win when all cells (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.",
-      showGrid: true,
-      gridGenerator: generateWinningGrid,
-      helpTextDefault: "Use what you've learned about mines and regions to reveal all cells safely!",
-    },
-    {
-      title: "Game Modes",
-      content: `<div class="space-y-4">
+const tutorialSteps = [
+  {
+    title: "The Basics",
+    content: "Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers can't repeat in rows or columns. Try revealing more cells!",
+    showGrid: true,
+    gridGenerator: generateNumbersGrid,
+    helpTextDefault: "Click on unrevealed cells to discover more numbers. Notice how each number appears exactly once in each row and column.",
+  },
+  {
+    title: "The Mines",
+    content: "Each colored region contains exactly one mine. The mine is always the highest number in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!",
+    showGrid: true,
+    gridGenerator: generateMinesGrid,
+    helpTextDefault: "Click on unrevealed cells in the partially revealed regions to see how numbers work with mines.",
+  },
+  {
+    title: "Region Completion",
+    content: "When you reveal all non-mine cells in a region, the mine is automatically revealed safely. This region shows where you can try this - reveal the remaining cells to see what happens!",
+    showGrid: true,
+    gridGenerator: generateRegionCompletionGrid,
+    helpTextDefault: "Click on the remaining unrevealed cells to safely reveal the mine.",
+  },
+  {
+    title: "Winning the Game",
+    content: "You win when all cells (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.",
+    showGrid: true,
+    gridGenerator: generateWinningGrid,
+    helpTextDefault: "Use what you've learned about mines and regions to reveal all cells safely!",
+  },
+  {
+    title: "Game Modes",
+    content: `<div class="space-y-4">
   <div class="bg-card p-4 rounded-lg ">
     <h3 class="text-foreground font-bold text-lg mb-2">Zen Mode</h3>
     <p class="text-foreground">
@@ -67,15 +60,22 @@ export default function TutorialPage() {
     </p>
   </div>
 </div>`,
-      showGrid: false,
-      showButtons: true,
-    }, {
-      title: "Ready to Play?",
-      content: "",
-      showGrid: false,
-      showButtons: true,
-    },
-  ];
+    showGrid: false,
+    showButtons: true,
+  }, {
+    title: "Ready to Play?",
+    content: "",
+    showGrid: false,
+    showButtons: true,
+  },
+];
+
+export default function TutorialPage() {
+  const [step, setStep] = useState(0);
+  const [grid, setGrid] = useState<TutorialCellState[][]>([]);
+  const [helpText, setHelpText] = useState<string>("");
+  const [previousGrid, setPreviousGrid] = useState<TutorialCellState[][]>([]);
+  const [mineClicked, setMineClicked] = useState(false);
 
   const currentStep = tutorialSteps[step];
   const isLastStep = step === tutorialSteps.length - 1;
