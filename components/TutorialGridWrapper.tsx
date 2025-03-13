@@ -75,22 +75,8 @@ export default function TutorialGridWrapper({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1">
-        <GameContext.Provider value={contextValue}>
-          <Grid />
-        </GameContext.Provider>
-      </div>
-
-      {/* Help text container - always present but conditionally visible */}
-      <div className="h-8 mt-2 text-center text-sm">
-        {helpText ? (
-          <p className="bg-card rounded-md p-1">{helpText}</p>
-        ) : (
-          // Invisible placeholder
-          <p className="opacity-0 p-1">&#8203;</p>
-        )}
-      </div>
-    </div>
+    <GameContext.Provider value={contextValue}>
+      <Grid />
+    </GameContext.Provider>
   );
 } 

@@ -140,31 +140,25 @@ export default function TutorialPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="w-full h-[72px]">
-        <div className="container h-full p-4 flex items-center">
-          <div className="flex-1 flex justify-start">
-            <Link href="/">
-              <Button variant="outline" className="flex items-center gap-2 border-foreground">
-                <Home size={18} />
-              </Button>
-            </Link>
-          </div>
-          <div className="flex-1 flex justify-center">
-            <h1 className="text-2xl font-bold">How to Play</h1>
-          </div>
-          <div className="flex-1 flex justify-end">
-            {/* Spacer for alignment */}
-            <div className="w-[40px]"></div>
-          </div>
+    <div className="min-h-screen bg-background grid grid-rows-[72px_1fr]">
+      <header className="w-full">
+        <div className="container h-full p-4 grid grid-cols-[auto_1fr_auto] gap-4 items-center">
+          <Link href="/">
+            <Button variant="outline" className="grid grid-flow-col gap-2 border-foreground">
+              <Home size={18} />
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold">How to Play</h1>
+          {/* Spacer for alignment */}
+          <div className="w-[40px]"></div>
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col justify-between">
+      <div className="grid grid-rows-[1fr_2fr_1fr] px-4 max-w-2xl mx-auto w-full">
         {/* Top area - Instructions */}
-        <div className="flex-1 flex items-center justify-center">
+        <div className="grid place-items-center">
           {!isLastStep && (
-            <div className="bg-card p-4 rounded-lg shadow-lg max-w-2xl w-full mx-auto min-h-[120px] flex flex-col justify-center">
+            <div className="bg-card p-4 rounded-lg w-full min-h-[120px] grid content-start">
               <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
               <p className="text-muted-foreground">{currentStep.content}</p>
             </div>
@@ -172,19 +166,19 @@ export default function TutorialPage() {
         </div>
 
         {/* Middle area - Grid or Ready to Play */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="max-w-md w-full mx-auto">
+        <div className="grid place-items-center w-full">
+          <div className="w-full">
             {isLastStep ? (
-              <div className="w-full aspect-square flex flex-col items-center justify-center bg-card rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold mb-4">{tutorialSteps[tutorialSteps.length - 1].title}</h2>
-                <p className="text-muted-foreground text-center mb-8 px-8">{tutorialSteps[tutorialSteps.length - 1].content}</p>
+              <div className="bg-card p-4 rounded-lg w-full grid content-start gap-4">
+                <h2 className="text-2xl font-bold">{tutorialSteps[tutorialSteps.length - 1].title}</h2>
+                <p className="text-muted-foreground">{tutorialSteps[tutorialSteps.length - 1].content}</p>
 
-                <div className="flex gap-6 justify-center">
+                <div className="grid grid-cols-2 gap-6">
                   <Link href="/game/zen">
-                    <Button size="lg" className="px-8">Zen Mode</Button>
+                    <Button size="lg" className="px-8 w-full">Zen Mode</Button>
                   </Link>
                   <Link href="/game/classic">
-                    <Button size="lg" className="px-8">Classic Mode</Button>
+                    <Button size="lg" className="px-8 w-full">Classic Mode</Button>
                   </Link>
                 </div>
               </div>
@@ -195,7 +189,7 @@ export default function TutorialPage() {
                 helpText={helpText}
               />
             ) : (
-              <div className="text-muted-foreground text-center">
+              <div className="text-muted-foreground text-left">
                 {step === 0 ? "Welcome to Sudoku Minesweeper!" : "Let's play!"}
               </div>
             )}
@@ -203,14 +197,14 @@ export default function TutorialPage() {
         </div>
 
         {/* Bottom area - Navigation buttons */}
-        <div className="flex-1 px-2 flex items-center justify-center">
+        <div className="grid place-items-center">
           {!isLastStep && (
-            <div className="flex justify-between w-full max-w-md mx-auto">
+            <div className="grid grid-cols-2 gap-4 w-full">
               <Button
                 onClick={prevStep}
                 disabled={step === 0}
                 variant="outline"
-                className="flex items-center gap-2 border-foreground"
+                className="grid grid-flow-col gap-2 border-foreground"
               >
                 <ChevronLeft size={18} />
                 Previous
@@ -218,7 +212,7 @@ export default function TutorialPage() {
 
               <Button
                 onClick={nextStep}
-                className="flex items-center gap-2"
+                className="grid grid-flow-col gap-2"
               >
                 Next
                 <ChevronRight size={18} />

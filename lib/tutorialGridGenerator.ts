@@ -10,28 +10,28 @@ export interface TutorialCellState {
 const createBaseTutorialGrid = (): TutorialCellState[][] => {
   return [
     [
-      { value: 3, revealed: false, isMine: false, componentId: 0 },
-      { value: 2, revealed: false, isMine: false, componentId: 0 },
-      { value: 3, revealed: false, isMine: false, componentId: 1 },
-      { value: 4, revealed: false, isMine: true, componentId: 1 },
+      { value: 3, revealed: true, isMine: false, componentId: 0 },
+      { value: 4, revealed: true, isMine: true, componentId: 0 },
+      { value: 2, revealed: true, isMine: false, componentId: 1 },
+      { value: 1, revealed: true, isMine: false, componentId: 1 },
     ],
     [
-      { value: 3, revealed: false, isMine: false, componentId: 0 },
-      { value: 4, revealed: false, isMine: true, componentId: 0 },
-      { value: 1, revealed: false, isMine: false, componentId: 1 },
-      { value: 2, revealed: false, isMine: false, componentId: 1 },
+      { value: 4, revealed: true, isMine: true, componentId: 2 },
+      { value: 1, revealed: true, isMine: false, componentId: 0 },
+      { value: 3, revealed: true, isMine: false, componentId: 3 },
+      { value: 2, revealed: true, isMine: false, componentId: 1 },
     ],
     [
-      { value: 2, revealed: false, isMine: false, componentId: 2 },
-      { value: 3, revealed: false, isMine: false, componentId: 2 },
-      { value: 4, revealed: false, isMine: true, componentId: 3 },
-      { value: 1, revealed: false, isMine: false, componentId: 3 },
+      { value: 1, revealed: true, isMine: false, componentId: 2 },
+      { value: 2, revealed: true, isMine: false, componentId: 3 },
+      { value: 4, revealed: true, isMine: true, componentId: 3 },
+      { value: 3, revealed: true, isMine: false, componentId: 1 },
     ],
     [
-      { value: 4, revealed: false, isMine: true, componentId: 2 },
-      { value: 1, revealed: false, isMine: false, componentId: 2 },
-      { value: 2, revealed: false, isMine: false, componentId: 3 },
-      { value: 3, revealed: false, isMine: false, componentId: 3 },
+      { value: 2, revealed: true, isMine: false, componentId: 2 },
+      { value: 3, revealed: true, isMine: false, componentId: 2 },
+      { value: 1, revealed: true, isMine: false, componentId: 3 },
+      { value: 4, revealed: true, isMine: true, componentId: 1 },
     ],
   ];
 };
