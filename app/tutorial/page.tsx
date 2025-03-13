@@ -16,31 +16,23 @@ import {
 const tutorialSteps = [
   {
     title: "The Basics",
-    content: "Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers can't repeat in rows or columns. Try revealing more cells!",
-    showGrid: true,
+    content: `<p>Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers can't repeat in rows or columns. Try revealing more cells!</p>`,
     gridGenerator: generateNumbersGrid,
-    helpTextDefault: "Click on unrevealed cells to discover more numbers. Notice how each number appears exactly once in each row and column.",
   },
   {
     title: "The Mines",
-    content: "Each colored region contains exactly one mine. The mine is always the highest number in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!",
-    showGrid: true,
+    content: `<p>Each colored region contains exactly one mine. The mine is always the highest number in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!</p>`,
     gridGenerator: generateMinesGrid,
-    helpTextDefault: "Click on unrevealed cells in the partially revealed regions to see how numbers work with mines.",
   },
   {
     title: "Region Completion",
-    content: "When you reveal all non-mine cells in a region, the mine is automatically revealed safely. This region shows where you can try this - reveal the remaining cells to see what happens!",
-    showGrid: true,
+    content: `<p>When you reveal all non-mine cells in a region, the mine is automatically revealed safely. This region shows where you can try this - reveal the remaining cells to see what happens!</p>`,
     gridGenerator: generateRegionCompletionGrid,
-    helpTextDefault: "Click on the remaining unrevealed cells to safely reveal the mine.",
   },
   {
     title: "Winning the Game",
-    content: "You win when all cells (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.",
-    showGrid: true,
+    content: `<p>You win when all cells (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.</p>`,
     gridGenerator: generateWinningGrid,
-    helpTextDefault: "Use what you've learned about mines and regions to reveal all cells safely!",
   },
   {
     title: "Game Modes",
@@ -60,25 +52,22 @@ const tutorialSteps = [
     </p>
   </div>
 </div>`,
-    showGrid: false,
-    showButtons: true,
-  }, {
+  },
+  {
     title: "Ready to Play?",
-    content: "",
-    showGrid: false,
-    showButtons: true,
+    content: `<p>Choose your game mode to start playing!</p>`,
   },
 ];
 
 export default function TutorialPage() {
   const [step, setStep] = useState(0);
   const [grid, setGrid] = useState<TutorialCellState[][]>([]);
-  const [helpText, setHelpText] = useState<string>("");
   const [previousGrid, setPreviousGrid] = useState<TutorialCellState[][]>([]);
   const [mineClicked, setMineClicked] = useState(false);
 
   const currentStep = tutorialSteps[step];
   const isLastStep = step === tutorialSteps.length - 1;
+  const showGrid = step < 4;
 
   // Update grid when step changes
   useEffect(() => {
@@ -90,14 +79,11 @@ export default function TutorialPage() {
       setPreviousGrid(newGrid);
       setMineClicked(false);
     }
-
-    // Reset the help text to the default for this step
-    setHelpText(currentTutorialStep.helpTextDefault || "");
-  }, [step]); // Only step is needed as a dependency
+  }, [step]);
 
   const handleCellClick = (row: number, col: number) => {
     // Don't allow interaction on steps that don't need it
-    if (step === 4 || step === 5) return;
+    if (step >= 4) return;
 
     if (mineClicked) {
       // Reset the grid to previous state
@@ -137,8 +123,9 @@ export default function TutorialPage() {
   };
 
   return (
-    <div className="bg-background min-h-screen flex flex-col overflow-x-hidden">
-      <header className="w-full flex-shrink-0">
+    <div className="bg-background min-h-screen h-screen grid grid-rows-[auto_1fr_auto]">
+      {/* Header */}
+      <header className="w-full">
         <div className="container h-full p-4 grid grid-cols-[auto_1fr_auto] gap-4 items-center">
           <Link href="/">
             <Button variant="outline" className="grid grid-flow-col gap-2 border-foreground w-[42px] h-[42px] p-0">
@@ -151,43 +138,32 @@ export default function TutorialPage() {
         </div>
       </header>
 
-      <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
-        {/* Top area - Instructions */}
-        <div className="max-w-2xl mx-auto w-full px-4">
-          <div className="bg-card p-4 rounded-lg w-full min-h-[120px] flex flex-col justify-center">
-            {!isLastStep ? (
-              <>
-                <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
-                {currentStep.content.startsWith('<') ? (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: currentStep.content }}
-                    className="text-muted-foreground"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">{currentStep.content}</p>
-                )}
-              </>
-            ) : (
-              <div /> /* Empty div for last step */
-            )}
+      {/* Main content area - grid layout with fixed rows */}
+      <main className="grid grid-rows-[auto_1fr] overflow-hidden">
+        {/* Title and description */}
+        <div className="w-full py-4">
+          <div className="max-w-2xl mx-auto w-full px-4">
+            <div className="bg-card p-4 rounded-lg w-full min-h-[120px]">
+              <h2 className="text-xl font-bold mb-2">{currentStep.title}</h2>
+              <div
+                dangerouslySetInnerHTML={{ __html: currentStep.content }}
+                className="text-muted-foreground"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Middle area - Grid or Ready to Play */}
-        <div className="flex-1 flex items-center justify-center w-full min-h-[400px]">
+        {/* Grid or content area */}
+        <div className="w-full grid place-items-center py-4">
           <div className="max-w-2xl w-full px-4">
-            {isLastStep ? (
-              <div className="bg-card p-4 rounded-lg w-full grid content-start gap-4">
-                <h2 className="text-2xl font-bold">{tutorialSteps[tutorialSteps.length - 1].title}</h2>
-                {currentStep.content.startsWith('<') ? (
-                  <div
-                    dangerouslySetInnerHTML={{ __html: currentStep.content }}
-                    className="text-muted-foreground"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">{currentStep.content}</p>
-                )}
-
+            {showGrid ? (
+              <TutorialGridWrapper
+                tutorialGrid={grid}
+                onCellClick={handleCellClick}
+                helpText=""
+              />
+            ) : isLastStep ? (
+              <div className="w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <Link href="/game/zen">
                     <Button size="lg" className="px-8 w-full">Zen Mode</Button>
@@ -197,42 +173,34 @@ export default function TutorialPage() {
                   </Link>
                 </div>
               </div>
-            ) : currentStep.showGrid ? (
-              <TutorialGridWrapper
-                tutorialGrid={grid}
-                onCellClick={handleCellClick}
-                helpText={helpText}
-              />
             ) : (
-              <></>
+              <div className="aspect-square w-full max-h-[300px]" aria-hidden="true"></div>
             )}
           </div>
         </div>
+      </main>
 
-        {/* Bottom area - Navigation buttons */}
-        <div className="w-full flex-shrink-0 pb-8 p-2">
-          {!isLastStep && (
-            <div className="flex p-4 flex-row gap-4 justify-center px-4">
-              <Button
-                onClick={prevStep}
-                disabled={step === 0}
-                className="grid grid-flow-col gap-2 bg-background text-foreground border-2 border-foreground rounded-lg w-[150px]"
-              >
-                <ChevronLeft size={18} />
-                Previous
-              </Button>
+      {/* Navigation buttons - fixed at bottom */}
+      <footer className="w-full py-8">
+        <div className="grid grid-cols-2 gap-4 max-w-md mx-auto px-4">
+          <Button
+            onClick={prevStep}
+            disabled={step === 0}
+            className="grid grid-flow-col gap-2 bg-background text-foreground border-2 border-foreground rounded-lg"
+          >
+            <ChevronLeft size={18} />
+            Previous
+          </Button>
 
-              <Button
-                onClick={nextStep}
-                className="grid grid-flow-col gap-2 bg-foreground text-background rounded-lg w-[150px]"
-              >
-                Next
-                <ChevronRight size={18} />
-              </Button>
-            </div>
-          )}
+          <Button
+            onClick={nextStep}
+            className="grid grid-flow-col gap-2 bg-foreground text-background rounded-lg"
+          >
+            Next
+            <ChevronRight size={18} />
+          </Button>
         </div>
-      </div >
-    </div >
+      </footer>
+    </div>
   );
 }
