@@ -141,7 +141,7 @@ export default function TutorialPage() {
       <header className="w-full flex-shrink-0">
         <div className="container h-full p-4 grid grid-cols-[auto_1fr_auto] gap-4 items-center">
           <Link href="/">
-            <Button variant="outline" className="grid grid-flow-col gap-2 border-foreground w-42 h-42 p-0">
+            <Button variant="outline" className="grid place-items-center border-foreground w-[48px] h-[48px] p-0 min-w-0">
               <Home size={42} />
             </Button>
           </Link>
