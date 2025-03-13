@@ -77,6 +77,33 @@ export default function TutorialPage() {
   const currentStep = tutorialSteps[step];
   const isLastStep = step === tutorialSteps.length - 1;
 
+  // Handle browser back button
+  useEffect(() => {
+    // Initialize history state with current step
+    window.history.replaceState({ step: step }, '');
+
+    // Handle popstate event (back/forward buttons)
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && typeof event.state.step === 'number') {
+        setStep(event.state.step);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
+  // Update history when step changes
+  useEffect(() => {
+    // Don't push state on initial render
+    if (typeof window !== 'undefined' && window.history.state && window.history.state.step !== step) {
+      window.history.pushState({ step: step }, '');
+    }
+  }, [step]);
+
   // Update grid when step changes
   useEffect(() => {
     const currentTutorialStep = tutorialSteps[step];
@@ -129,7 +156,7 @@ export default function TutorialPage() {
 
   const prevStep = () => {
     if (step > 0) {
-      setStep(step - 1);
+      window.history.back();
     }
   };
 
