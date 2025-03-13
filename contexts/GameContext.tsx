@@ -36,6 +36,7 @@ export interface GameContextType {
   setGameMode: (mode: 'classic' | 'zen') => void;
   nextGridSize: number | null;
   generateNewGrid: () => void;
+  isNewGridCreated: boolean;
 }
 
 // Define game mode state interface
@@ -143,6 +144,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [hintUsageCount, setHintUsageCount] = useState(0);
   const [consecutiveWins, setConsecutiveWins] = useState(0);
   const [shouldResetConsecutiveWins, setShouldResetConsecutiveWins] = useState(false);
+  const [isNewGridCreated, setIsNewGridCreated] = useState(false);
 
   // Initialize the game state
   useEffect(() => {
@@ -198,6 +200,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
 
     setIsLoading(true);
+    // Reset the new grid flag first
+    setIsNewGridCreated(false);
 
     // Determine the grid size to use
     let gameInitSize = currentGridSize;
@@ -239,6 +243,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
 
         setGrid(cellStates);
+
+        // Set the new grid created flag to trigger animations
+        setIsNewGridCreated(true);
+
+        // Reset the flag after a delay to prevent animations on subsequent renders
+        setTimeout(() => {
+          setIsNewGridCreated(false);
+        }, 1500);
+
         const componentGrid = event.data.componentGrid;
         if (!componentGrid || componentGrid.length !== gameInitSize || componentGrid[0].length !== gameInitSize) {
           setMessage("Failed to generate grid.");
@@ -387,6 +400,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setGameMode: customSetGameMode,
     nextGridSize,
     generateNewGrid,
+    isNewGridCreated,
   };
 
   return (

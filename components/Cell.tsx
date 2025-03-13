@@ -2,7 +2,7 @@
 
 import { CellState } from "@/lib/sudoku-minesweeper"
 import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 // Move color conversion logic outside component
 const hexToRGB = (hex: string) => {
@@ -17,12 +17,41 @@ interface CellProps {
   cell: CellState
   onClick: () => void
   gridSize: number
+  isNewGrid?: boolean
+  gameWon?: boolean
+  gameLost?: boolean
+  rowIndex?: number
+  colIndex?: number
 }
 
-export function Cell({ cell, onClick, gridSize }: CellProps) {
+export function Cell({
+  cell,
+  onClick,
+  gridSize,
+  isNewGrid = false,
+  gameWon = false,
+  gameLost = false,
+  rowIndex = 0,
+  colIndex = 0
+}: CellProps) {
   const { theme } = useTheme()
   const [mutedColor, setMutedColor] = useState('')
   const [originalColor, setOriginalColor] = useState('')
+  const [winAnimation, setWinAnimation] = useState(false)
+  const [loseAnimation, setLoseAnimation] = useState(false)
+  const prevGameWonRef = useRef(gameWon)
+  const prevGameLostRef = useRef(gameLost)
+
+  // Calculate animation delays based on position
+  const newGridDelay = `${(rowIndex + colIndex) * 30}ms`
+  const winAnimationDelay = `${(rowIndex + colIndex) * 20}ms`
+  const loseAnimationDelay = `${(rowIndex + colIndex) * 15}ms`
+
+  // Define animation durations
+  const colorTransitionDuration = '200ms'
+  const appearAnimationDuration = '600ms'
+  const winAnimationDuration = '500ms'
+  const loseAnimationDuration = '400ms'
 
   useEffect(() => {
     // Get the CSS variable value
@@ -51,11 +80,55 @@ export function Cell({ cell, onClick, gridSize }: CellProps) {
     setMutedColor(`rgb(${mutedRGB.r}, ${mutedRGB.g}, ${mutedRGB.b})`)
   }, [cell.componentId, theme]) // Re-calculate when theme changes
 
+  // Handle win animation - only trigger when gameWon changes from false to true
+  useEffect(() => {
+    if (gameWon && !prevGameWonRef.current) {
+      setWinAnimation(true)
+      const timer = setTimeout(() => {
+        setWinAnimation(false)
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+    prevGameWonRef.current = gameWon
+  }, [gameWon])
+
+  // Handle lose animation - only trigger when gameLost changes from false to true
+  useEffect(() => {
+    if (gameLost && !prevGameLostRef.current) {
+      setLoseAnimation(true)
+      const timer = setTimeout(() => {
+        setLoseAnimation(false)
+      }, 600) // Shorter duration for lose animation
+      return () => clearTimeout(timer)
+    }
+    prevGameLostRef.current = gameLost
+  }, [gameLost])
+
   return (
     <div
-      className="flex items-center justify-center rounded-sm border border-background aspect-square transition-colors duration-200"
+      className={`
+        flex items-center justify-center rounded-sm border border-background aspect-square
+        ${isNewGrid ? 'animate-cell-appear' : ''}
+        ${winAnimation ? 'animate-cell-win' : ''}
+        ${loseAnimation ? 'animate-cell-lose' : ''}
+      `}
       style={{
         backgroundColor: cell.revealed ? mutedColor : originalColor,
+        animationDelay: isNewGrid
+          ? newGridDelay
+          : winAnimation
+            ? winAnimationDelay
+            : loseAnimation
+              ? loseAnimationDelay
+              : '0ms',
+        animationDuration: isNewGrid
+          ? appearAnimationDuration
+          : winAnimation
+            ? winAnimationDuration
+            : loseAnimation
+              ? loseAnimationDuration
+              : '0ms',
+        transition: `background-color ${colorTransitionDuration}`,
       }}
       onClick={onClick}
     >

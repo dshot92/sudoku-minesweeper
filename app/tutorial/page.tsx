@@ -99,7 +99,7 @@ export default function TutorialPage() {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, []);
+  }, [step]);
 
   // Update history when step changes
   useEffect(() => {
