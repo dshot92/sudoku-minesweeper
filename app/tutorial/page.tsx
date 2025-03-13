@@ -13,17 +13,22 @@ import {
   generateWinningGrid
 } from '@/lib/tutorialGridGenerator';
 
+// Helper function to convert markdown-style bold to HTML
+const convertMarkdownBold = (text: string) => {
+  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+};
+
 const tutorialSteps = [
   {
     title: "The Basics",
-    content: "Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers can't repeat in rows or columns. Try revealing more cells!",
+    content: "Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers **can't repeat in rows or columns**. Try revealing more cells!",
     showGrid: true,
     gridGenerator: generateNumbersGrid,
     helpTextDefault: "Click on unrevealed cells to discover more numbers. Notice how each number appears exactly once in each row and column.",
   },
   {
     title: "The Mines",
-    content: "Each colored region contains exactly one mine. The mine is always the highest number in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!",
+    content: "Each colored region contains **exactly one mine**. The mine is always the **highest number** in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!",
     showGrid: true,
     gridGenerator: generateMinesGrid,
     helpTextDefault: "Click on unrevealed cells in the partially revealed regions to see how numbers work with mines.",
@@ -37,7 +42,7 @@ const tutorialSteps = [
   // },
   {
     title: "Winning the Game",
-    content: "You win when all cells (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.",
+    content: "You win when **all cells** (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.",
     showGrid: true,
     gridGenerator: generateWinningGrid,
     helpTextDefault: "Use what you've learned about mines and regions to reveal all cells safely!",
@@ -47,14 +52,14 @@ const tutorialSteps = [
     content: `<div>
     <h3 class="text-foreground font-bold text-lg ">Zen Mode</h3>
     <p class="text-foreground">
-      Unlimited puzzles, zero stress. <span class="font-semibold">Jump between grid sizes</span>, experiment freely, and play at your own pace. 
+      <strong>Unlimited puzzles, zero stress.</strong> <span class="font-semibold">Jump between grid sizes</span>, experiment freely, and play at your own pace. 
       No tracking, no pressure - just pure puzzle solving.
     </p>
     <br />
     <h3 class="text-foreground font-bold text-lg ">Classic Mode</h3>
     <p class="text-foreground">
-      A true test of skill. <span class="font-semibold">Start at 4×4 and climb the grid sizes</span>. 
-      Win 3 games in a row to level up. New Game doesn't count against you - so push your limits without fear.
+      <strong>A true test of skill.</strong> <span class="font-semibold">Start at 4×4 and climb the grid sizes</span>. 
+      Win <strong>3 games in a row</strong> to level up. New Game doesn't count against you - so push your limits without fear.
     </p>
 </div>`,
     showGrid: false,
@@ -183,10 +188,13 @@ export default function TutorialPage() {
             {currentStep.content.startsWith('<') ? (
               <div
                 dangerouslySetInnerHTML={{ __html: currentStep.content }}
-                className="text-muted-foreground"
+                className="text-foreground"
               />
             ) : (
-              <p className="text-muted-foreground">{currentStep.content}</p>
+              <div
+                dangerouslySetInnerHTML={{ __html: convertMarkdownBold(currentStep.content) }}
+                className="text-foreground"
+              />
             )}
           </div>
         </div>
