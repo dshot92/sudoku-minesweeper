@@ -209,29 +209,32 @@ export default function TutorialPage() {
           </div>
         </div>
 
-        {/* Bottom area - Navigation buttons */}
-        <div className="w-full flex-shrink-0 pb-8 p-2">
-          {!isLastStep && (
-            <div className="flex p-4 flex-row gap-4 justify-center px-4">
-              <Button
-                onClick={prevStep}
-                disabled={step === 0}
-                className="grid grid-flow-col gap-2 bg-background text-foreground border-2 border-foreground rounded-lg w-[150px]"
-              >
-                <ChevronLeft size={18} />
-                Previous
-              </Button>
+        {/* Navigation buttons - fixed at bottom */}
+        <footer className="w-full py-8">
+          <div className="grid grid-cols-2 gap-4 max-w-md mx-auto px-4">
+            <Button
+              onClick={prevStep}
+              disabled={step === 0}
+              className="grid grid-flow-col gap-2 bg-background text-foreground border-2 border-foreground rounded-lg"
+            >
+              <ChevronLeft size={18} />
+              Previous
+            </Button>
 
+            {!isLastStep && (
               <Button
                 onClick={nextStep}
-                className="grid grid-flow-col gap-2 bg-foreground text-background rounded-lg w-[150px]"
+                className="grid grid-flow-col gap-2 bg-foreground text-background rounded-lg"
               >
                 Next
                 <ChevronRight size={18} />
               </Button>
-            </div>
-          )}
-        </div>
+            )}
+            {isLastStep && (
+              <div></div> // Empty div to maintain grid layout
+            )}
+          </div>
+        </footer>
       </div >
     </div >
   );
