@@ -5,24 +5,26 @@ import { useGame } from "@/contexts/GameContext";
 import { useEffect, useRef } from "react";
 
 export default function ClassicMode() {
-  const { setGameMode, gameMode, consecutiveWins } = useGame();
+  const { setGameMode, gameMode, grid, generateNewGrid } = useGame();
   const initializedRef = useRef(false);
+  const gridInitializedRef = useRef(false);
 
+  // Set the game mode once when the component first mounts
   useEffect(() => {
-    // Only set the game mode once when the component first mounts
     if (!initializedRef.current) {
       setGameMode('classic');
       initializedRef.current = true;
     }
   }, [setGameMode]);
 
+  // Ensure grid is initialized
   useEffect(() => {
-    // Verify game mode is set correctly
-  }, [gameMode]);
+    if (gameMode === 'classic' && (!grid || grid.length === 0) && !gridInitializedRef.current) {
+      generateNewGrid();
+      gridInitializedRef.current = true;
+    }
+  }, [gameMode, grid, generateNewGrid]);
 
-  // Added to track win changes
-  useEffect(() => {
-  }, [consecutiveWins]);
 
   return (
     <div className="w-full h-full max-w-xl flex items-center justify-center">

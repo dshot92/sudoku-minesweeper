@@ -19,13 +19,25 @@ import { Slider } from '@/components/ui/slider';
 
 export default function LateralMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const { gridSize, setGridSize, setGameMode } = useGame();
+  const { gridSize, setGridSize, setGameMode, gameMode, changeZenModeGridSize } = useGame();
   const { volume, setVolume, isMuted, toggleMute, isPlaying, togglePlay } = useAudio();
   const pathname = usePathname();
 
   const handleGridSizeChange = (value: string) => {
-    setGridSize(parseInt(value));
-    setIsOpen(false);
+    const newSize = parseInt(value);
+
+    // Only generate a new grid if we're in zen mode
+    if (isZenMode && gameMode === 'zen') {
+      // Close the menu first to avoid UI issues during grid generation
+      setIsOpen(false);
+      // Use setTimeout to ensure the menu is closed before changing the grid
+      setTimeout(() => {
+        changeZenModeGridSize(newSize);
+      }, 100);
+    } else {
+      setGridSize(newSize);
+      setIsOpen(false);
+    }
   };
 
   const isZenMode = pathname === '/game/zen';

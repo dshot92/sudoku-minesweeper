@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/contexts/GameContext";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 const BUTTON_ICONS = {
   LOST: "/game-button/lost.svg",
@@ -11,15 +11,8 @@ const BUTTON_ICONS = {
 } as const;
 
 export default function NewGameButton() {
-  const { gameOver, gameWon, initializeGame, isLoading, gameMode } = useGame();
+  const { gameOver, gameWon, initializeGame, isLoading, gameMode, grid } = useGame();
 
-  // Initialize game on first render only for zen mode
-  useEffect(() => {
-    // Only auto-initialize in zen mode, not in classic mode
-    if (gameMode === 'zen') {
-      initializeGame();
-    }
-  }, [initializeGame, gameMode]);
 
   // Add keyboard event handler
   useEffect(() => {

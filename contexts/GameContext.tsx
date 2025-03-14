@@ -7,6 +7,26 @@ import { CellState, generateSolvedGrid, handleCellClick } from '@/lib/sudoku-min
 export const GRID_PROGRESSION = [3, 4, 5, 6, 7, 8];
 export const MAX_CONSECUTIVE_WINS_FOR_PROGRESSION = 3;
 
+// Define local storage keys
+const STORAGE_KEY_PREFIX = 'sudoku-minesweeper';
+const CLASSIC_STORAGE_KEY = `${STORAGE_KEY_PREFIX}-classic`;
+const ZEN_STORAGE_KEY = `${STORAGE_KEY_PREFIX}-zen`;
+const LAST_PLAYED_MODE_KEY = `${STORAGE_KEY_PREFIX}-last-mode`;
+
+// Define the interface for the saved game state
+interface SavedGameState {
+  grid: CellState[][];
+  gameOver: boolean;
+  gameWon: boolean;
+  message: string;
+  gridSize: number;
+  hints: number;
+  hintUsageCount: number;
+  consecutiveWins: number;
+  nextGridSize: number | null;
+  timestamp: number; // To track when the game was saved
+}
+
 // Export the interface so it can be used by other components
 export interface GameContextType {
   // Core Game State
@@ -48,6 +68,9 @@ export interface GameContextType {
   resetConsecutiveWins: () => void;
   getNextGridSize: () => number;
   generateNewGrid: () => void;
+
+  // New function for changing grid size in zen mode
+  changeZenModeGridSize: (size: number) => void;
 }
 
 // Define game mode state interface
@@ -62,7 +85,8 @@ interface GameModeState {
 type GameModeAction =
   | { type: 'SET_MODE', payload: { mode: 'classic' | 'zen' } }
   | { type: 'SET_GRID_SIZE', payload: { size: number } }
-  | { type: 'INITIALIZE', payload: { defaultSize: number } };
+  | { type: 'INITIALIZE', payload: { defaultSize: number } }
+  | { type: 'RESTORE_STATE', payload: { state: GameModeState } };
 
 // Game mode reducer for more predictable state updates
 function gameModeReducer(state: GameModeState, action: GameModeAction): GameModeState {
@@ -106,8 +130,22 @@ function gameModeReducer(state: GameModeState, action: GameModeAction): GameMode
         currentGridSize: GRID_PROGRESSION[0]
       };
 
+    case 'RESTORE_STATE':
+      return action.payload.state;
+
     default:
       return state;
+  }
+}
+
+// Helper function to safely parse JSON from localStorage
+function safelyParseJSON(json: string | null): any | null {
+  if (!json) return null;
+  try {
+    return JSON.parse(json);
+  } catch (e) {
+    console.error('Failed to parse JSON from localStorage:', e);
+    return null;
   }
 }
 
@@ -117,6 +155,7 @@ export const GameContext = createContext<GameContextType | undefined>(undefined)
 export function GameProvider({ children }: { children: ReactNode }) {
   // Track initialization
   const isInitialized = useRef(false);
+  const hasRestoredState = useRef(false);
 
   // Use reducer for game mode and grid size state
   const [gameModeState, dispatchGameMode] = useReducer(
@@ -145,6 +184,76 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [shouldResetConsecutiveWins, setShouldResetConsecutiveWins] = useState(false);
   const [isNewGridCreated, setIsNewGridCreated] = useState(false);
 
+  // Function to save the current game state to localStorage
+  const saveGameState = useCallback(() => {
+    if (!gameMode) return;
+
+    // Don't save if grid is empty or not properly initialized
+    if (!grid || grid.length === 0) {
+      return;
+    }
+
+    const stateToSave: SavedGameState = {
+      grid,
+      gameOver,
+      gameWon,
+      message,
+      gridSize: currentGridSize,
+      hints,
+      hintUsageCount,
+      consecutiveWins,
+      nextGridSize,
+      timestamp: Date.now()
+    };
+
+    const storageKey = gameMode === 'classic' ? CLASSIC_STORAGE_KEY : ZEN_STORAGE_KEY;
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(stateToSave));
+      localStorage.setItem(LAST_PLAYED_MODE_KEY, gameMode);
+    } catch (e) {
+      console.error('Failed to save game state to localStorage:', e);
+    }
+  }, [
+    gameMode, grid, gameOver, gameWon, message,
+    currentGridSize, hints, hintUsageCount, consecutiveWins, nextGridSize
+  ]);
+
+  // Function to restore game state from localStorage
+  const restoreGameState = useCallback((mode: 'classic' | 'zen') => {
+    const storageKey = mode === 'classic' ? CLASSIC_STORAGE_KEY : ZEN_STORAGE_KEY;
+    const savedStateJSON = localStorage.getItem(storageKey);
+
+    const savedState = safelyParseJSON(savedStateJSON) as SavedGameState | null;
+
+    if (savedState) {
+      console.log(`Restoring ${mode} mode state`, {
+        gridSize: savedState.gridSize,
+        gridLength: savedState.grid.length,
+        savedAt: new Date(savedState.timestamp).toISOString()
+      });
+
+      setGrid(savedState.grid);
+      setGameOver(savedState.gameOver);
+      setGameWon(savedState.gameWon);
+      setMessage(savedState.message);
+      setHints(savedState.hints);
+      setHintUsageCount(savedState.hintUsageCount);
+      setConsecutiveWins(savedState.consecutiveWins);
+      setNextGridSize(savedState.nextGridSize);
+
+      // Update grid size in the reducer
+      dispatchGameMode({
+        type: 'SET_GRID_SIZE',
+        payload: { size: savedState.gridSize }
+      });
+
+      return true;
+    }
+
+    return false;
+  }, []);
+
   // Initialize the game state
   useEffect(() => {
     if (!isInitialized.current) {
@@ -154,37 +263,68 @@ export function GameProvider({ children }: { children: ReactNode }) {
         payload: { defaultSize: GRID_PROGRESSION[0] }
       });
 
+      // Try to restore the last played mode
+      if (typeof window !== 'undefined') {
+        const lastPlayedMode = localStorage.getItem(LAST_PLAYED_MODE_KEY) as 'classic' | 'zen' | null;
+        if (lastPlayedMode) {
+          dispatchGameMode({
+            type: 'SET_MODE',
+            payload: { mode: lastPlayedMode }
+          });
+        }
+      }
+
       isInitialized.current = true;
     }
   }, []);
 
-  // Generate grid when needed
-  useEffect(() => {
-    // Only generate grid after we have a game mode
-    if (isInitialized.current && gameMode) {
-      generateNewGrid();
-    }
-  }, [isInitialized.current, gameMode]);
-
   // Custom setGameMode using the reducer
   const customSetGameMode = useCallback((mode: 'classic' | 'zen') => {
-    if (mode === gameMode) return;
+
+    if (mode === gameMode) {
+      return;
+    }
+
+    // Save current state before switching modes
+    if (gameMode) {
+      saveGameState();
+    }
 
     dispatchGameMode({ type: 'SET_MODE', payload: { mode } });
+    hasRestoredState.current = false;
 
-    setGameOver(false);
-    setGameWon(false);
-    setMessage("");
+    // Don't reset these here as we'll try to restore from localStorage first
+    // setGameOver(false);
+    // setGameWon(false);
+    // setMessage("");
 
-    if (mode === 'classic' && gameMode !== 'classic') {
-      setConsecutiveWins(0);
-    }
-  }, [gameMode]);
+    // if (mode === 'classic' && gameMode !== 'classic') {
+    //   setConsecutiveWins(0);
+    // }
+  }, [gameMode, saveGameState]);
 
   // Custom setGridSize using the reducer
   const customSetGridSize = useCallback((size: number) => {
+
+    // If we're in zen mode, we want to clear the saved state for the current grid size
+    // This ensures that when we switch back to this grid size, we'll get a fresh grid
+    if (gameMode === 'zen') {
+      try {
+        // We don't need to clear the entire zen state, just mark it as needing a new grid
+        const savedStateJSON = localStorage.getItem(ZEN_STORAGE_KEY);
+        if (savedStateJSON) {
+          const savedState = safelyParseJSON(savedStateJSON) as SavedGameState | null;
+          if (savedState && savedState.gridSize === size) {
+            localStorage.removeItem(ZEN_STORAGE_KEY);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to clear saved state:', e);
+      }
+    }
+
     dispatchGameMode({ type: 'SET_GRID_SIZE', payload: { size } });
-  }, []);
+  }, [gameMode, currentGridSize]);
 
   // Unified grid generation function
   const generateNewGrid = useCallback(() => {
@@ -192,6 +332,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     setIsLoading(true);
     setIsNewGridCreated(false);
+
+    // Reset game state when generating a new grid
+    setGameOver(false);
+    setGameWon(false);
+    setMessage("");
 
     let gameInitSize = currentGridSize;
 
@@ -225,7 +370,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-
         setGrid(cellStates);
         setIsNewGridCreated(true);
 
@@ -243,7 +387,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       worker.terminate();
     };
 
-    worker.onerror = () => {
+    worker.onerror = (error) => {
       setMessage("Failed to generate grid.");
       setIsLoading(false);
       worker.terminate();
@@ -251,6 +395,34 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     worker.postMessage({ type: "generateGrid", size: gameInitSize });
   }, [currentGridSize, nextGridSize, gameMode, shouldResetConsecutiveWins]);
+
+  // Restore game state when game mode changes
+  useEffect(() => {
+    if (isInitialized.current && gameMode && !hasRestoredState.current) {
+      const restored = restoreGameState(gameMode);
+      hasRestoredState.current = true;
+
+      // Only generate a new grid if we couldn't restore the state
+      if (!restored) {
+        generateNewGrid();
+      }
+    }
+  }, [isInitialized.current, gameMode, restoreGameState, generateNewGrid]);
+
+  // Save game state whenever relevant state changes
+  useEffect(() => {
+    if (gameMode && !isLoading) {
+      // Add a small delay to ensure all state updates have been applied
+      // This is especially important after generating a new grid
+      setTimeout(() => {
+        saveGameState();
+      }, 100);
+    }
+  }, [
+    gameMode, grid, gameOver, gameWon,
+    currentGridSize, hints, hintUsageCount,
+    consecutiveWins, nextGridSize, saveGameState, isLoading
+  ]);
 
   const initializeGame = useCallback(() => {
     setMessage("");
@@ -292,6 +464,77 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setConsecutiveWins(0);
   }, []);
 
+  // Function to change grid size and generate a new grid (specifically for zen mode)
+  const changeZenModeGridSize = useCallback((size: number) => {
+    if (gameMode !== 'zen') return;
+
+    // Clear any existing saved state for zen mode to ensure a fresh start
+    try {
+      localStorage.removeItem(ZEN_STORAGE_KEY);
+    } catch (e) {
+      console.error('Failed to clear saved state:', e);
+    }
+
+    // Reset game state
+    setGameOver(false);
+    setGameWon(false);
+    setMessage("");
+    setIsLoading(true);
+
+    // First update the grid size
+    dispatchGameMode({ type: 'SET_GRID_SIZE', payload: { size } });
+
+    // Set hints to match the new grid size
+    setHints(size);
+
+    // Use a timeout to ensure state updates have been applied before generating the grid
+    setTimeout(() => {
+      // Generate a new grid with the updated size
+      const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
+
+      worker.onmessage = (event: MessageEvent) => {
+        if (event.data.error) {
+          setMessage("Failed to generate grid.");
+        } else {
+          const cellStates: CellState[][] = event.data.grid;
+          const componentGrid = event.data.componentGrid;
+
+          if (!cellStates || cellStates.length !== size || cellStates[0].length !== size ||
+            !componentGrid || componentGrid.length !== size || componentGrid[0].length !== size) {
+            setMessage("Failed to generate grid.");
+            setIsLoading(false);
+            worker.terminate();
+            return;
+          }
+
+          setGrid(cellStates);
+          setIsNewGridCreated(true);
+
+          setTimeout(() => {
+            setIsNewGridCreated(false);
+          }, 1500);
+
+          worker.postMessage({
+            type: "generatePuzzle",
+            filledGrid: cellStates.map((row: CellState[]) => row.map(cell => cell.value)),
+            componentGrid,
+          });
+        }
+        setIsLoading(false);
+        worker.terminate();
+      };
+
+      worker.onerror = (error) => {
+        setMessage("Failed to generate grid.");
+        setIsLoading(false);
+        worker.terminate();
+      };
+
+      worker.postMessage({ type: "generateGrid", size });
+    }, 50);
+
+  }, [gameMode]);
+
   const value = {
     grid,
     gameOver,
@@ -305,6 +548,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     isLoading,
     gridSize: currentGridSize,
     setGridSize: customSetGridSize,
+    changeZenModeGridSize,
     hints,
     setHints,
     hintUsageCount,
