@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useGame } from "@/contexts/GameContext";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 const BUTTON_ICONS = {
   LOST: "/game-button/lost.svg",
@@ -11,7 +11,7 @@ const BUTTON_ICONS = {
 } as const;
 
 export default function NewGameButton() {
-  const { gameOver, gameWon, initializeGame, isLoading, gameMode, grid } = useGame();
+  const { gameOver, gameWon, initializeGame, isLoading } = useGame();
 
 
   // Add keyboard event handler
