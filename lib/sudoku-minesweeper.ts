@@ -285,6 +285,82 @@ const createConnectedComponents = (
   throw new Error(`Failed to create ${size} components of size ${size} after ${maxAttempts} attempts`);
 };
 
+/**
+ * Check if all non-mine cells in a component are revealed and reveal the mine if so
+ * @param grid The game grid
+ * @returns Updated grid with mines revealed in completed components
+ */
+export const revealMinesInCompletedComponents = (grid: CellState[][]): CellState[][] => {
+  const size = grid.length;
+  const newGrid = [...grid.map(row => [...row])];
+
+  // Get all unique component IDs
+  const componentIds = new Set<number>();
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      componentIds.add(newGrid[row][col].componentId);
+    }
+  }
+
+  // Check each component
+  componentIds.forEach(componentId => {
+    let allNonMinesRevealed = true;
+    let minePosition: { row: number, col: number } | null = null;
+
+    // Find all cells in this component
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        const cell = newGrid[row][col];
+        if (cell.componentId === componentId) {
+          if (cell.isMine) {
+            minePosition = { row, col };
+          } else if (!cell.revealed) {
+            allNonMinesRevealed = false;
+          }
+        }
+      }
+    }
+
+    // If all non-mine cells are revealed, reveal the mine too
+    if (allNonMinesRevealed && minePosition) {
+      newGrid[minePosition.row][minePosition.col].revealed = true;
+    }
+  });
+
+  return newGrid;
+};
+
+/**
+ * Check if the game is in a won state
+ * @param grid The game grid
+ * @returns True if all non-mine cells and all mines are revealed
+ */
+export const isGameWon = (grid: CellState[][]): boolean => {
+  const size = grid.length;
+
+  // Check if all non-mine cells are revealed
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = grid[row][col];
+      if (!cell.isMine && !cell.revealed) {
+        return false;
+      }
+    }
+  }
+
+  // Check if all mines are revealed
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = grid[row][col];
+      if (cell.isMine && !cell.revealed) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+};
+
 // Generate a solved grid
 export const generateSolvedGrid = (
   size: number,
@@ -383,7 +459,20 @@ export const generateSolvedGrid = (
         newGrid[row][col].revealed = true;
       }
 
-      return newGrid;
+      // Step 6: Check if any components are completed and reveal their mines
+      const finalGrid = revealMinesInCompletedComponents(newGrid);
+
+      // Step 7: Ensure the game isn't already won
+      if (isGameWon(finalGrid)) {
+        // If the game is already won, try again with fewer revealed cells
+        if (maxInitialRevealed && maxInitialRevealed > size / 2) {
+          return generateSolvedGrid(size, Math.floor(maxInitialRevealed * 0.8));
+        }
+        attempts++;
+        continue;
+      }
+
+      return finalGrid;
     } catch {
       attempts++;
     }
@@ -436,74 +525,20 @@ export const handleCellClick = (
     };
   }
 
-  // Check if all non-mine cells in this component are revealed
-  const componentId = cell.componentId;
-  let allNonMinesInComponentRevealed = true;
-  let minePosition: { row: number, col: number } | null = null;
+  // Check for completed components and reveal their mines
+  const updatedGrid = revealMinesInCompletedComponents(newGrid);
 
-  // console.log('Checking component:', { componentId });
-
-  // Find all cells in this component
-  for (let r = 0; r < gridSize; r++) {
-    for (let c = 0; c < gridSize; c++) {
-      if (newGrid[r][c].componentId === componentId) {
-        if (newGrid[r][c].isMine) {
-          minePosition = { row: r, col: c };
-          // console.log('Mine found in component:', { row: r, col: c });
-        } else if (!newGrid[r][c].revealed) {
-          allNonMinesInComponentRevealed = false;
-          // console.log('Unrevealed non-mine cell found:', { row: r, col: c });
-        }
-      }
-    }
-  }
-
-  // If all non-mine cells in the component are revealed, reveal the mine too
-  if (allNonMinesInComponentRevealed && minePosition) {
-    // console.log('All non-mine cells in component revealed, revealing mine');
-    newGrid[minePosition.row][minePosition.col].revealed = true;
-  }
-
-  // Comprehensive win condition check
-  const checkGameWon = (newGrid: CellState[][]): boolean => {
-    // console.log('Checking win condition');
-    // Check if all non-mine cells are revealed
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        const cell = newGrid[r][c];
-        if (!cell.isMine && !cell.revealed) {
-          // console.log('Unrevealed non-mine cell found:', { row: r, col: c });
-          return false;
-        }
-      }
-    }
-
-    // Check if all mines are revealed
-    for (let r = 0; r < gridSize; r++) {
-      for (let c = 0; c < gridSize; c++) {
-        const cell = newGrid[r][c];
-        if (cell.isMine && !cell.revealed) {
-          // console.log('Unrevealed mine found:', { row: r, col: c });
-          return false;
-        }
-      }
-    }
-
-    // console.log('Game won condition met!');
-    return true;
-  };
-
-  // Use the new comprehensive win check
-  if (checkGameWon(newGrid)) {
+  // Check if the game is won
+  if (isGameWon(updatedGrid)) {
     return {
-      newGrid,
+      newGrid: updatedGrid,
       gameOver: false,
       gameWon: true,
       message: "You won!"
     };
   }
 
-  return { newGrid, gameOver: false, gameWon: false, message: "" };
+  return { newGrid: updatedGrid, gameOver: false, gameWon: false, message: "" };
 };
 
 // Add utility functions at the top
