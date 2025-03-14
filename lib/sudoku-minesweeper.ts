@@ -286,7 +286,10 @@ const createConnectedComponents = (
 };
 
 // Generate a solved grid
-export const generateSolvedGrid = (size: number): CellState[][] => {
+export const generateSolvedGrid = (
+  size: number,
+  maxInitialRevealed?: number
+): CellState[][] => {
   let attempts = 0;
   const maxAttempts = 1000;
 
@@ -370,6 +373,14 @@ export const generateSolvedGrid = (size: number): CellState[][] => {
       // Set mines
       for (const { row, col } of componentHighestValues.values()) {
         newGrid[row][col].isMine = true;
+      }
+
+      // Step 5: Find minimum cells to reveal for a unique solution
+      const cellsToReveal = findMinimumRevealedCells(newGrid, componentGrid, maxInitialRevealed);
+
+      // Set these cells as revealed by default
+      for (const { row, col } of cellsToReveal) {
+        newGrid[row][col].revealed = true;
       }
 
       return newGrid;
@@ -641,6 +652,77 @@ export const generatePuzzle = (filledGrid: number[][], componentGrid: number[][]
   return puzzle;
 };
 
+/**
+ * Determine the minimum set of cells that need to be revealed for the puzzle to have a unique solution
+ * @param grid The game grid
+ * @param componentGrid The component grid
+ * @param maxCells Maximum number of cells to reveal (optional, defaults to size)
+ * @returns Array of cell coordinates to reveal
+ */
+export const findMinimumRevealedCells = (
+  grid: CellState[][],
+  componentGrid: number[][],
+  maxCells?: number
+): { row: number, col: number }[] => {
+  const size = grid.length;
+  // Default maxCells to the grid size if not specified
+  const maxRevealedCells = maxCells || size;
+
+  // Get all non-mine cells
+  const nonMineCells = getAllCoordinates(size)
+    .filter(([row, col]) => !grid[row][col].isMine);
+
+  // Shuffle to randomize the selection
+  const shuffledCells = shuffle(nonMineCells);
+
+  // Create a numeric grid for testing uniqueness
+  const numericGrid: number[][] = Array(size)
+    .fill(null)
+    .map(() => Array(size).fill(0));
+
+  const minimumRevealedCells: { row: number, col: number }[] = [];
+
+  // First pass: add cells until we have a unique solution
+  for (const [row, col] of shuffledCells) {
+    // If we've already reached our maximum, stop
+    if (minimumRevealedCells.length >= maxRevealedCells) break;
+
+    // Try adding this cell
+    numericGrid[row][col] = grid[row][col].value;
+    minimumRevealedCells.push({ row, col });
+
+    // Check if we have a unique solution
+    if (hasUniqueSolution(numericGrid, componentGrid)) {
+      break; // We found a set that gives a unique solution
+    }
+  }
+
+  // If we didn't find a unique solution, return what we have
+  if (!hasUniqueSolution(numericGrid, componentGrid)) {
+    return minimumRevealedCells;
+  }
+
+  // Second pass: try to remove cells while maintaining uniqueness
+  // Start from the end to prioritize keeping earlier cells
+  for (let i = minimumRevealedCells.length - 1; i >= 0; i--) {
+    const { row, col } = minimumRevealedCells[i];
+    const originalValue = numericGrid[row][col];
+
+    // Try removing this cell
+    numericGrid[row][col] = 0;
+
+    // If solution is still unique, we can remove this cell
+    if (hasUniqueSolution(numericGrid, componentGrid)) {
+      minimumRevealedCells.splice(i, 1);
+    } else {
+      // Otherwise, restore it
+      numericGrid[row][col] = originalValue;
+    }
+  }
+
+  return minimumRevealedCells;
+};
+
 // Add this function to the existing file
 export const generateHint = (grid: CellState[][]): { row: number, col: number } | null => {
   const size = grid.length;
@@ -664,4 +746,67 @@ export const generateHint = (grid: CellState[][]): { row: number, col: number } 
   // Randomly select a hidden non-mine cell
   const randomIndex = Math.floor(Math.random() * hiddenNonMineCells.length);
   return hiddenNonMineCells[randomIndex];
+};
+
+/**
+ * Calculate the difficulty level based on the number of revealed cells
+ * @param grid The game grid
+ * @returns Difficulty level as a string: 'easy', 'medium', 'hard', or 'expert'
+ */
+export const calculateDifficulty = (grid: CellState[][]): string => {
+  const size = grid.length;
+  const totalCells = size * size;
+  const mineCount = size; // One mine per component
+  const nonMineCells = totalCells - mineCount;
+
+  // Count revealed non-mine cells
+  let revealedNonMineCells = 0;
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = grid[row][col];
+      if (cell.revealed && !cell.isMine) {
+        revealedNonMineCells++;
+      }
+    }
+  }
+
+  // Calculate percentage of revealed non-mine cells
+  const revealedPercentage = (revealedNonMineCells / nonMineCells) * 100;
+
+  // Determine difficulty based on percentage
+  if (revealedPercentage >= 50) {
+    return 'easy';
+  } else if (revealedPercentage >= 30) {
+    return 'medium';
+  } else if (revealedPercentage >= 15) {
+    return 'hard';
+  } else {
+    return 'expert';
+  }
+};
+
+/**
+ * Generate a grid with a specific difficulty level
+ * @param size The size of the grid
+ * @param difficulty The desired difficulty: 'easy', 'medium', 'hard', or 'expert'
+ * @returns A grid with the specified difficulty
+ */
+export const generateGridWithDifficulty = (
+  size: number,
+  difficulty: 'easy' | 'medium' | 'hard' | 'expert'
+): CellState[][] => {
+  // Map difficulty to maximum percentage of revealed cells
+  const difficultyMap = {
+    'easy': 0.5,    // 50% of non-mine cells revealed
+    'medium': 0.3,  // 30% of non-mine cells revealed
+    'hard': 0.15,   // 15% of non-mine cells revealed
+    'expert': 0.05  // 5% of non-mine cells revealed
+  };
+
+  const percentage = difficultyMap[difficulty];
+  const totalNonMineCells = size * size - size; // Total cells minus mines
+  const maxCellsToReveal = Math.ceil(totalNonMineCells * percentage);
+
+  // Generate grid with the calculated maximum number of revealed cells
+  return generateSolvedGrid(size, maxCellsToReveal);
 };
