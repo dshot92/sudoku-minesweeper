@@ -74,13 +74,14 @@ export default function TutorialGridWrapper({
     nextGridSize: null,
     generateNewGrid: () => { },
     isNewGridCreated: false,
+    changeZenModeGridSize: () => { },
   };
 
   return (
 
-      <GameContext.Provider value={contextValue}>
-        <Grid />
-      </GameContext.Provider>
+    <GameContext.Provider value={contextValue}>
+      <Grid />
+    </GameContext.Provider>
 
   );
 } 
