@@ -4,8 +4,8 @@
   "description": "A unique blend of Sudoku and Minesweeper",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#000000",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "icons/icon-blue.png",
@@ -14,4 +14,4 @@
       "purpose": "any maskable"
     }
   ]
-} 
+}
