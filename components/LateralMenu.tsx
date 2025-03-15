@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Menu, X, Settings } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useGame, GRID_PROGRESSION } from '@/contexts/GameContext';
 
 export default function LateralMenu() {

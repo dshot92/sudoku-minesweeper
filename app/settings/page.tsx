@@ -13,7 +13,6 @@ export default function SettingsPage() {
   const {
     volume,
     setVolume,
-    isPlaying,
     isMuted,
     setIsMuted,
     playIfPossible,
@@ -39,7 +38,7 @@ export default function SettingsPage() {
     if (!isMuted) {
       setIsMuted(true);
     }
-  }, []);
+  }, [isMuted, setIsMuted]);
 
   const handleVolumeChange = (values: number[]) => {
     const newVolume = values[0];
@@ -134,7 +133,7 @@ export default function SettingsPage() {
               </div>
               <Switch
                 checked={animationsEnabled}
-                onCheckedChange={(checked) => {
+                onCheckedChange={() => {
                   // This prevents the switch from handling the click twice
                   // The parent div's onClick will handle the toggle
                 }}
