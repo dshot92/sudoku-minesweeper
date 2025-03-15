@@ -6,7 +6,7 @@ import { useGame } from '@/contexts/GameContext';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Volume2, VolumeX, Home, Sun, Moon } from 'lucide-react';
+import { Volume2, VolumeX, Home } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
 
