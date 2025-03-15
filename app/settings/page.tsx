@@ -33,14 +33,11 @@ export default function SettingsPage() {
     setDisplayVolume(Math.round(volume * 100));
   }, [volume]);
 
-  // Try to auto-play when component mounts if volume > 0 and not muted
+  // Set initial muted state when component mounts
   useEffect(() => {
-    if (volume > 0 && !isMuted && !isPlaying) {
-      // Use a timeout to ensure the audio context is ready
-      const timer = setTimeout(() => {
-        playIfPossible();
-      }, 500);
-      return () => clearTimeout(timer);
+    // Start with audio muted
+    if (!isMuted) {
+      setIsMuted(true);
     }
   }, []);
 
@@ -112,67 +109,101 @@ export default function SettingsPage() {
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full flex flex-col max-w-md space-y-8">
 
-          <div className="space-y-6 bg-card p-6 rounded-lg shadow-md">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Game Settings</h2>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium">Animations</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Enable or disable game animations
-                  </p>
-                </div>
-                <Switch
-                  checked={animationsEnabled}
-                  onCheckedChange={toggleAnimations}
-                  aria-label="Toggle animations"
-                />
+          {/* Animations Setting */}
+          <div className="flex flex-col space-y-4">
+            <div
+              className="flex items-center justify-between p-4 rounded-lg cursor-pointer hover:bg-accent/30 transition-colors"
+              onClick={toggleAnimations}
+              role="button"
+              tabIndex={0}
+              aria-pressed={animationsEnabled}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  toggleAnimations();
+                }
+              }}
+            >
+              <div>
+                <h3 className="text-base font-medium">Animations</h3>
+                <p className="text-sm text-muted-foreground">
+                  Enable or disable game animations
+                </p>
               </div>
+              <Switch
+                checked={animationsEnabled}
+                onCheckedChange={(checked) => {
+                  // This prevents the switch from handling the click twice
+                  // The parent div's onClick will handle the toggle
+                }}
+                onClick={(e) => {
+                  // Stop propagation to prevent double toggling
+                  e.stopPropagation();
+                }}
+                aria-label="Toggle animations"
+              />
             </div>
           </div>
 
-          <div className="space-y-6 bg-card p-6 rounded-lg shadow-md">
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Audio Settings</h2>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <label className="text-sm font-medium">Music Volume</label>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleMuteToggle}
-                      className="h-8 w-8"
-                    >
-                      {isMuted || volume === 0 ? (
-                        <VolumeX className="h-4 w-4" />
-                      ) : (
-                        <Volume2 className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <span className="text-sm font-medium min-w-[40px] text-right">
-                      {isMuted ? "Muted" : `${displayVolume}%`}
-                    </span>
-                  </div>
-                </div>
-
-                <Slider
-                  defaultValue={[volume]}
-                  value={[volume]}
-                  max={1}
-                  step={0.01}
-                  onValueChange={handleVolumeChange}
-                  aria-label="Music Volume"
-                  className={`py-2 ${isMuted ? "opacity-50" : ""}`}
-                />
-
+          {/* Music Volume Setting */}
+          <div className="flex flex-col space-y-4">
+            <div
+              className="flex items-center justify-between p-4 rounded-lg cursor-pointer hover:bg-accent/30 transition-colors"
+              onClick={handleMuteToggle}
+              role="button"
+              tabIndex={0}
+              aria-pressed={!isMuted}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleMuteToggle();
+                }
+              }}
+            >
+              <div>
+                <h3 className="text-base font-medium">Music Volume</h3>
+                <p className="text-sm text-muted-foreground">
+                  Adjust background music volume
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={(e) => {
+                    // Stop propagation to prevent double toggling
+                    e.stopPropagation();
+                    handleMuteToggle();
+                  }}
+                >
+                  {isMuted || volume === 0 ? (
+                    <VolumeX className="h-4 w-4" />
+                  ) : (
+                    <Volume2 className="h-4 w-4" />
+                  )}
+                </Button>
+                <span className="text-sm font-medium min-w-[40px] text-right">
+                  {isMuted ? "Muted" : `${displayVolume}%`}
+                </span>
               </div>
             </div>
+
+            <div className="px-4">
+              <Slider
+                defaultValue={[volume]}
+                value={[volume]}
+                max={1}
+                step={0.01}
+                onValueChange={handleVolumeChange}
+                aria-label="Music Volume"
+                className={`py-2 ${isMuted ? "opacity-50" : ""}`}
+              />
+            </div>
           </div>
+
         </div>
       </main>
     </div>
