@@ -6,8 +6,9 @@ import { useGame } from '@/contexts/GameContext';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Volume2, VolumeX, Home } from 'lucide-react';
+import { Volume2, VolumeX, Home, Sun, Moon } from 'lucide-react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function SettingsPage() {
   const {
@@ -200,6 +201,24 @@ export default function SettingsPage() {
                 aria-label="Music Volume"
                 className={`py-2 ${isMuted ? "opacity-50" : ""}`}
               />
+            </div>
+          </div>
+
+          {/* Theme Setting */}
+          <div className="flex flex-col space-y-4">
+            <div
+              className="flex items-center justify-between p-4 rounded-lg cursor-pointer hover:bg-accent/30 transition-colors"
+              role="button"
+              tabIndex={0}
+              aria-label="Theme toggle"
+            >
+              <div>
+                <h3 className="text-base font-medium">Theme</h3>
+                <p className="text-sm text-muted-foreground">
+                  Toggle between light and dark mode
+                </p>
+              </div>
+              <ThemeToggle />
             </div>
           </div>
 
