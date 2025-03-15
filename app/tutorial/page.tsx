@@ -13,11 +13,6 @@ import {
   generateWinningGrid
 } from '@/lib/tutorialGridGenerator';
 
-// Helper function to convert markdown-style bold to HTML
-const convertMarkdownBold = (text: string) => {
-  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-};
-
 // Tutorial Step Components
 const TutorialStep1 = ({ 
   grid, 
@@ -33,7 +28,7 @@ const TutorialStep1 = ({
       <div className="bg-card p-4 rounded-lg w-full min-h-[120px] flex flex-col justify-center">
         <h2 className="text-xl font-bold mb-2">The Basics</h2>
         <div className="text-foreground">
-          Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers <strong>can't repeat in rows or columns</strong>. Try revealing more cells!
+          Each region contains numbers 1 through N (where N is the grid size). Each row and column also contains numbers 1 through N. These cells show how numbers <strong>can&apos;t repeat in rows or columns</strong>. Try revealing more cells!
         </div>
       </div>
     </div>
@@ -63,7 +58,7 @@ const TutorialStep2 = ({
       <div className="bg-card p-4 rounded-lg w-full min-h-[120px] flex flex-col justify-center">
         <h2 className="text-xl font-bold mb-2">The Mines</h2>
         <div className="text-foreground">
-          Each colored region contains <strong>exactly one mine</strong>. The mine is always the <strong>highest number</strong> in that region. These cells show the mines - notice they're always the number 4 in a 4x4 grid. Try revealing more cells!
+          Each colored region contains <strong>exactly one mine</strong>. The mine is always the <strong>highest number</strong> in that region. These cells show the mines - notice they&apos;re always the number 4 in a 4x4 grid. Try revealing more cells!
         </div>
       </div>
     </div>
@@ -185,8 +180,8 @@ const TutorialStep6 = ({
       <div className="bg-card p-4 rounded-lg w-full min-h-[120px] flex flex-col justify-center">
         <h2 className="text-xl font-bold mb-2">Mine Safety</h2>
         <div className="text-foreground">
-          <p>Remember, clicking on a mine <strong>doesn't end the game</strong>, but it's more efficient to reveal them through region completion!</p>
-          <p className="mt-2">Try revealing all cells in this grid to win, using the strategies you've learned.</p>
+          <p>Remember, clicking on a mine <strong>doesn&apos;t end the game</strong>, but it&apos;s more efficient to reveal them through region completion!</p>
+          <p className="mt-2">Try revealing all cells in this grid to win, using the strategies you&apos;ve learned.</p>
         </div>
       </div>
     </div>
@@ -216,7 +211,7 @@ const TutorialStep7 = ({
       <div className="bg-card p-4 rounded-lg w-full min-h-[120px] flex flex-col justify-center">
         <h2 className="text-xl font-bold mb-2">Winning the Game</h2>
         <div className="text-foreground">
-          You win when <strong>all cells</strong> (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you've learned about mines and regions.
+          You win when <strong>all cells</strong> (including mines) are revealed. Some cells are already revealed to get you started - try to reveal the rest! Remember the rules you&apos;ve learned about mines and regions.
         </div>
       </div>
     </div>
@@ -247,7 +242,7 @@ const TutorialStep8 = () => (
           <h3 className="text-foreground font-bold text-lg">Classic Mode</h3>
           <p className="text-foreground">
             <strong>A true test of skill.</strong> <span className="font-semibold">Start at 4×4 and climb the grid sizes</span>. 
-      Win <strong>3 games in a row</strong> to level up. New Game doesn't count against you - so push your limits without fear.
+      Win <strong>3 games in a row</strong> to level up. New Game doesn&apos;t count against you - so push your limits without fear.
     </p>
         </div>
       </div>
