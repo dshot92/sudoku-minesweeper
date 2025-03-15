@@ -55,3 +55,8 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+/* Prevent scrollbar from appearing when win game animation inflates cells */
+* {
+  overflow: hidden;
+}
