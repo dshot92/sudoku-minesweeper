@@ -78,6 +78,7 @@ export default function TutorialGridWrapper({
     changeZenModeGridSize: () => { },
     animationsEnabled: true,
     toggleAnimations: () => { },
+    getPreviousGridSize: () => 3,
   };
 
   return (
