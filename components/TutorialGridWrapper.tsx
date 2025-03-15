@@ -23,6 +23,7 @@ const adaptTutorialGridToCellState = (tutorialGrid: TutorialCellState[][]): Cell
     row.map(cell => ({
       ...cell,
       isHighlighted: cell.isHighlighted || false,
+      isFlag: false,
       // Add any additional properties CellState might need
     } as CellState))
   );
@@ -75,6 +76,8 @@ export default function TutorialGridWrapper({
     generateNewGrid: () => { },
     isNewGridCreated: false,
     changeZenModeGridSize: () => { },
+    animationsEnabled: true,
+    toggleAnimations: () => { },
   };
 
   return (

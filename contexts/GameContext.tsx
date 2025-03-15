@@ -192,16 +192,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Animation settings
   const [animationsEnabled, setAnimationsEnabled] = useState<boolean>(() => {
-    // Default to true, but check localStorage
-    const savedValue = localStorage.getItem(ANIMATIONS_ENABLED_KEY);
-    return savedValue !== null ? savedValue === 'true' : true;
+    // Default to true, but check localStorage if we're in the browser
+    if (typeof window !== 'undefined') {
+      const savedValue = localStorage.getItem(ANIMATIONS_ENABLED_KEY);
+      return savedValue !== null ? savedValue === 'true' : true;
+    }
+    return true; // Default to true on the server
   });
 
   // Toggle animations function
   const toggleAnimations = useCallback(() => {
     setAnimationsEnabled(prev => {
       const newValue = !prev;
-      localStorage.setItem(ANIMATIONS_ENABLED_KEY, String(newValue));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(ANIMATIONS_ENABLED_KEY, String(newValue));
+      }
       return newValue;
     });
   }, []);
