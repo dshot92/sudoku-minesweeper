@@ -77,6 +77,9 @@ export interface GameContextType {
 
   // New function for changing grid size in zen mode
   changeZenModeGridSize: (size: number) => void;
+
+  // New helper function to get the previous grid size
+  getPreviousGridSize: () => number;
 }
 
 // Define game mode state interface
@@ -461,6 +464,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setMessage("");
     setGameOver(false);
     setGameWon(false);
+    
+    // This logic in initializeGame is not needed anymore - we'll handle it in handleCellClick
+    // We'll remove this code to avoid duplicate logic
     generateNewGrid();
   }, [generateNewGrid]);
 
@@ -568,6 +574,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   }, [gameMode]);
 
+  // New helper function to get the previous grid size
+  const getPreviousGridSize = useCallback(() => {
+    const currentIndex = GRID_PROGRESSION.indexOf(currentGridSize);
+    return currentIndex > 0 
+      ? GRID_PROGRESSION[currentIndex - 1] 
+      : currentGridSize;
+  }, [currentGridSize]);
+
   const value = {
     grid,
     gameOver,
@@ -615,6 +629,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (result.gameOver) {
         setGameOver(true);
         setMessage(result.message || "Game Over! Try again.");
+        
+        // Check if in classic mode and player has 0 consecutive wins
+        if (gameMode === 'classic' && consecutiveWins === 0) {
+          // Get the previous grid size in the progression
+          const previousSize = getPreviousGridSize();
+          
+          // Only decrease grid size if we're not already at the smallest size
+          if (previousSize !== currentGridSize) {
+            setNextGridSize(previousSize);
+            setMessage(result.message || "Grid size decreased. Try again.");
+          }
+        }
+        
         resetConsecutiveWins();
       }
 
@@ -630,6 +657,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     isNewGridCreated,
     animationsEnabled,
     toggleAnimations,
+    getPreviousGridSize,
   };
 
   return (
