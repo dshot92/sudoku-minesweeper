@@ -134,15 +134,28 @@ export function Cell({
     >
       {cell.revealed && (
         cell.value === gridSize ? (
-          <div
-            style={{
-              width: '36px',
-              height: '36px',
-              WebkitMask: 'url("/mine.svg") center/contain no-repeat',
-              mask: 'url("/mine.svg") center/contain no-repeat',
-              backgroundColor: originalColor
-            }}
-          />
+          // Show flag for auto-revealed mines, show mine for directly clicked mines
+          cell.isFlag ? (
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                WebkitMask: 'url("/flag.svg") center/contain no-repeat',
+                mask: 'url("/flag.svg") center/contain no-repeat',
+                backgroundColor: originalColor
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                WebkitMask: 'url("/mine.svg") center/contain no-repeat',
+                mask: 'url("/mine.svg") center/contain no-repeat',
+                backgroundColor: originalColor
+              }}
+            />
+          )
         ) : (
           <span
             style={{

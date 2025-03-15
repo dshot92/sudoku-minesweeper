@@ -2,6 +2,7 @@ export type CellState = {
   value: number
   revealed: boolean
   isMine: boolean
+  isFlag: boolean
   componentId: number
 }
 
@@ -324,6 +325,7 @@ export const revealMinesInCompletedComponents = (grid: CellState[][]): CellState
     // If all non-mine cells are revealed, reveal the mine too
     if (allNonMinesRevealed && minePosition) {
       newGrid[minePosition.row][minePosition.col].revealed = true;
+      newGrid[minePosition.row][minePosition.col].isFlag = true;
     }
   });
 
@@ -424,6 +426,7 @@ export const generateSolvedGrid = (
               value: latinSquare[row][col],
               revealed: false,
               isMine: false,
+              isFlag: false,
               componentId: componentGrid[row][col],
             }))
         );
@@ -510,6 +513,9 @@ export const handleCellClick = (
   // Check if it's a mine
   if (cell.isMine) {
     // console.log('Mine clicked! Game over.');
+    // Make sure this mine is not marked as a flag since it was clicked directly
+    cell.isFlag = false;
+
     // Reveal all cells when game is lost
     for (let r = 0; r < gridSize; r++) {
       for (let c = 0; c < gridSize; c++) {
