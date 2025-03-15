@@ -9,6 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { Volume2, VolumeX, Home } from 'lucide-react';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useTheme } from 'next-themes';
+import { useThemeSetup } from '@/hooks/useThemeSetup';
 
 export default function SettingsPage() {
   const {
@@ -22,6 +24,8 @@ export default function SettingsPage() {
   const [displayVolume, setDisplayVolume] = useState(Math.round(volume * 100));
   const [prevVolume, setPrevVolume] = useState(volume > 0 ? volume : 0.5); // Track previous volume for mute toggle
   const [mounted, setMounted] = useState(false);
+  const { setTheme, theme } = useTheme();
+  useThemeSetup(); // Add the theme setup hook
 
   // Prevent hydration mismatch
   useEffect(() => {
@@ -208,8 +212,17 @@ export default function SettingsPage() {
           <div className="flex flex-col space-y-4">
             <div
               className="flex items-center justify-between p-4 rounded-lg cursor-pointer hover:bg-accent/30 transition-colors"
+              onClick={() => {
+                setTheme(theme === "light" ? "dark" : "light");
+              }}
               role="button"
               tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setTheme(theme === "light" ? "dark" : "light");
+                }
+              }}
               aria-label="Theme toggle"
             >
               <div>
@@ -218,7 +231,12 @@ export default function SettingsPage() {
                   Toggle between light and dark mode
                 </p>
               </div>
-              <ThemeToggle />
+              <ThemeToggle 
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  // Stop propagation to prevent double toggling
+                  e.stopPropagation();
+                }}
+              />
             </div>
           </div>
 
