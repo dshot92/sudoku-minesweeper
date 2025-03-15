@@ -484,6 +484,140 @@ export const generateSolvedGrid = (
   throw new Error(`Failed to generate a valid grid after ${maxAttempts} attempts`);
 };
 
+/**
+ * Check if all non-mine cells in rows and columns are revealed and flag the mine if so
+ * @param grid The game grid
+ * @returns Updated grid with mines flagged in completed rows and columns
+ */
+export const flagMinesInCompletedRowsAndColumns = (grid: CellState[][]): CellState[][] => {
+  const size = grid.length;
+  const newGrid = [...grid.map(row => [...row])];
+
+  // Check each row
+  for (let row = 0; row < size; row++) {
+    let allNonMinesRevealed = true;
+    let minePosition: { row: number, col: number } | null = null;
+
+    // Find all cells in this row
+    for (let col = 0; col < size; col++) {
+      const cell = newGrid[row][col];
+      if (cell.isMine) {
+        minePosition = { row, col };
+      } else if (!cell.revealed) {
+        allNonMinesRevealed = false;
+        break;
+      }
+    }
+
+    // If all non-mine cells are revealed, flag the mine
+    if (allNonMinesRevealed && minePosition) {
+      newGrid[minePosition.row][minePosition.col].revealed = true;
+      newGrid[minePosition.row][minePosition.col].isFlag = true;
+    }
+  }
+
+  // Check each column
+  for (let col = 0; col < size; col++) {
+    let allNonMinesRevealed = true;
+    let minePosition: { row: number, col: number } | null = null;
+
+    // Find all cells in this column
+    for (let row = 0; row < size; row++) {
+      const cell = newGrid[row][col];
+      if (cell.isMine) {
+        minePosition = { row, col };
+      } else if (!cell.revealed) {
+        allNonMinesRevealed = false;
+        break;
+      }
+    }
+
+    // If all non-mine cells are revealed, flag the mine
+    if (allNonMinesRevealed && minePosition) {
+      newGrid[minePosition.row][minePosition.col].revealed = true;
+      newGrid[minePosition.row][minePosition.col].isFlag = true;
+    }
+  }
+
+  return newGrid;
+};
+
+/**
+ * Reveals the last remaining unrevealed non-mine cell in the grid if there's only one left
+ * @param grid The game grid
+ * @returns Updated grid with the last cell revealed if applicable
+ */
+export const revealLastRemainingCell = (grid: CellState[][]): CellState[][] => {
+  const size = grid.length;
+  const newGrid = [...grid.map(row => [...row])];
+  
+  let unrevealed = 0;
+  let lastCell: { row: number, col: number } | null = null;
+  
+  // Count unrevealed non-mine cells and remember the last one
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = newGrid[row][col];
+      if (!cell.revealed && !cell.isMine) {
+        unrevealed++;
+        lastCell = { row, col };
+        
+        // If we've found more than one, we can exit early
+        if (unrevealed > 1) {
+          return newGrid;
+        }
+      }
+    }
+  }
+  
+  // If there's exactly one unrevealed non-mine cell, reveal it
+  if (unrevealed === 1 && lastCell) {
+    newGrid[lastCell.row][lastCell.col].revealed = true;
+  }
+  
+  return newGrid;
+};
+
+/**
+ * Check if all mines are flagged
+ * @param grid The game grid
+ * @returns True if all mines are flagged
+ */
+export const areAllMinesFlagged = (grid: CellState[][]): boolean => {
+  const size = grid.length;
+  
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = grid[row][col];
+      // If there's a mine that's not flagged, return false
+      if (cell.isMine && !cell.isFlag) {
+        return false;
+      }
+    }
+  }
+  
+  // All mines are flagged
+  return true;
+};
+
+/**
+ * Reveal all remaining cells in the grid (for when game is won by flagging all mines)
+ * @param grid The game grid
+ * @returns Updated grid with all cells revealed
+ */
+export const revealAllCells = (grid: CellState[][]): CellState[][] => {
+  const size = grid.length;
+  const newGrid = [...grid.map(row => [...row])];
+  
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      newGrid[row][col].revealed = true;
+    }
+  }
+  
+  return newGrid;
+};
+
 // Handle cell click and return updated grid and game state
 export const handleCellClick = (
   grid: CellState[][],
@@ -532,9 +666,28 @@ export const handleCellClick = (
   }
 
   // Check for completed components and reveal their mines
-  const updatedGrid = revealMinesInCompletedComponents(newGrid);
+  let updatedGrid = revealMinesInCompletedComponents(newGrid);
+  
+  // Also check for completed rows and columns and flag their mines
+  updatedGrid = flagMinesInCompletedRowsAndColumns(updatedGrid);
+  
+  // Check if there's only one unrevealed non-mine cell and reveal it
+  updatedGrid = revealLastRemainingCell(updatedGrid);
+  
+  // Check if all mines are now flagged
+  if (areAllMinesFlagged(updatedGrid)) {
+    // Reveal all cells
+    updatedGrid = revealAllCells(updatedGrid);
+    
+    return {
+      newGrid: updatedGrid,
+      gameOver: false,
+      gameWon: true,
+      message: "You won!"
+    };
+  }
 
-  // Check if the game is won
+  // Check if the game is won through regular win condition
   if (isGameWon(updatedGrid)) {
     return {
       newGrid: updatedGrid,
