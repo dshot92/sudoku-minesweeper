@@ -12,6 +12,7 @@ const STORAGE_KEY_PREFIX = 'sudoku-minesweeper';
 const CLASSIC_STORAGE_KEY = `${STORAGE_KEY_PREFIX}-classic`;
 const ZEN_STORAGE_KEY = `${STORAGE_KEY_PREFIX}-zen`;
 const LAST_PLAYED_MODE_KEY = `${STORAGE_KEY_PREFIX}-last-mode`;
+const ANIMATIONS_ENABLED_KEY = `${STORAGE_KEY_PREFIX}-animations-enabled`;
 
 // Define the interface for the saved game state
 interface SavedGameState {
@@ -25,6 +26,7 @@ interface SavedGameState {
   consecutiveWins: number;
   nextGridSize: number | null;
   timestamp: number; // To track when the game was saved
+  animationsEnabled: boolean; // Add animation setting
 }
 
 // Export the interface so it can be used by other components
@@ -50,6 +52,10 @@ export interface GameContextType {
   hints: number;
   hintUsageCount: number;
   consecutiveWins: number;
+
+  // Animation Settings
+  animationsEnabled: boolean;
+  toggleAnimations: () => void;
 
   // State Setters
   setGrid: (grid: CellState[][]) => void;
@@ -184,6 +190,22 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [shouldResetConsecutiveWins, setShouldResetConsecutiveWins] = useState(false);
   const [isNewGridCreated, setIsNewGridCreated] = useState(false);
 
+  // Animation settings
+  const [animationsEnabled, setAnimationsEnabled] = useState<boolean>(() => {
+    // Default to true, but check localStorage
+    const savedValue = localStorage.getItem(ANIMATIONS_ENABLED_KEY);
+    return savedValue !== null ? savedValue === 'true' : true;
+  });
+
+  // Toggle animations function
+  const toggleAnimations = useCallback(() => {
+    setAnimationsEnabled(prev => {
+      const newValue = !prev;
+      localStorage.setItem(ANIMATIONS_ENABLED_KEY, String(newValue));
+      return newValue;
+    });
+  }, []);
+
   // Function to save the current game state to localStorage
   const saveGameState = useCallback(() => {
     if (!gameMode) return;
@@ -203,7 +225,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       hintUsageCount,
       consecutiveWins,
       nextGridSize,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      animationsEnabled
     };
 
     const storageKey = gameMode === 'classic' ? CLASSIC_STORAGE_KEY : ZEN_STORAGE_KEY;
@@ -216,7 +239,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [
     gameMode, grid, gameOver, gameWon, message,
-    currentGridSize, hints, hintUsageCount, consecutiveWins, nextGridSize
+    currentGridSize, hints, hintUsageCount, consecutiveWins, nextGridSize, animationsEnabled
   ]);
 
   // Function to restore game state from localStorage
@@ -241,6 +264,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setHintUsageCount(savedState.hintUsageCount);
       setConsecutiveWins(savedState.consecutiveWins);
       setNextGridSize(savedState.nextGridSize);
+
+      // Restore animation settings if available
+      if (savedState.animationsEnabled !== undefined) {
+        setAnimationsEnabled(savedState.animationsEnabled);
+      }
 
       // Update grid size in the reducer
       dispatchGameMode({
@@ -595,6 +623,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     nextGridSize,
     generateNewGrid,
     isNewGridCreated,
+    animationsEnabled,
+    toggleAnimations,
   };
 
   return (

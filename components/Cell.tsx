@@ -22,6 +22,7 @@ interface CellProps {
   gameLost?: boolean
   rowIndex?: number
   colIndex?: number
+  animationsEnabled?: boolean
 }
 
 export function Cell({
@@ -32,7 +33,8 @@ export function Cell({
   gameWon = false,
   gameLost = false,
   rowIndex = 0,
-  colIndex = 0
+  colIndex = 0,
+  animationsEnabled = true
 }: CellProps) {
   const { theme } = useTheme()
   const [mutedColor, setMutedColor] = useState('')
@@ -82,7 +84,7 @@ export function Cell({
 
   // Handle win animation - only trigger when gameWon changes from false to true
   useEffect(() => {
-    if (gameWon && !prevGameWonRef.current) {
+    if (gameWon && !prevGameWonRef.current && animationsEnabled) {
       setWinAnimation(true)
       const timer = setTimeout(() => {
         setWinAnimation(false)
@@ -90,11 +92,11 @@ export function Cell({
       return () => clearTimeout(timer)
     }
     prevGameWonRef.current = gameWon
-  }, [gameWon])
+  }, [gameWon, animationsEnabled])
 
   // Handle lose animation - only trigger when gameLost changes from false to true
   useEffect(() => {
-    if (gameLost && !prevGameLostRef.current) {
+    if (gameLost && !prevGameLostRef.current && animationsEnabled) {
       setLoseAnimation(true)
       const timer = setTimeout(() => {
         setLoseAnimation(false)
@@ -102,32 +104,39 @@ export function Cell({
       return () => clearTimeout(timer)
     }
     prevGameLostRef.current = gameLost
-  }, [gameLost])
+  }, [gameLost, animationsEnabled])
+
+  // Determine if animations should be applied
+  const shouldApplyAnimations = animationsEnabled && (isNewGrid || winAnimation || loseAnimation)
 
   return (
     <div
       className={`
         flex items-center justify-center rounded-sm border border-background aspect-square
-        ${isNewGrid ? 'animate-cell-appear' : ''}
-        ${winAnimation ? 'animate-cell-win' : ''}
-        ${loseAnimation ? 'animate-cell-lose' : ''}
+        ${animationsEnabled && isNewGrid ? 'animate-cell-appear' : ''}
+        ${animationsEnabled && winAnimation ? 'animate-cell-win' : ''}
+        ${animationsEnabled && loseAnimation ? 'animate-cell-lose' : ''}
       `}
       style={{
         backgroundColor: cell.revealed ? mutedColor : originalColor,
-        animationDelay: isNewGrid
-          ? newGridDelay
-          : winAnimation
-            ? winAnimationDelay
-            : loseAnimation
-              ? loseAnimationDelay
-              : '0ms',
-        animationDuration: isNewGrid
-          ? appearAnimationDuration
-          : winAnimation
-            ? winAnimationDuration
-            : loseAnimation
-              ? loseAnimationDuration
-              : '0ms',
+        animationDelay: shouldApplyAnimations
+          ? isNewGrid
+            ? newGridDelay
+            : winAnimation
+              ? winAnimationDelay
+              : loseAnimation
+                ? loseAnimationDelay
+                : '0ms'
+          : '0ms',
+        animationDuration: shouldApplyAnimations
+          ? isNewGrid
+            ? appearAnimationDuration
+            : winAnimation
+              ? winAnimationDuration
+              : loseAnimation
+                ? loseAnimationDuration
+                : '0ms'
+          : '0ms',
         transition: `background-color ${colorTransitionDuration}`,
       }}
       onClick={onClick}

@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAudio } from '@/contexts/AudioContext';
+import { useGame } from '@/contexts/GameContext';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Volume2, VolumeX, Home } from 'lucide-react';
 import Link from 'next/link';
 
@@ -16,8 +18,15 @@ export default function SettingsPage() {
     setIsMuted,
     playIfPossible,
   } = useAudio();
+  const { animationsEnabled, toggleAnimations } = useGame();
   const [displayVolume, setDisplayVolume] = useState(Math.round(volume * 100));
   const [prevVolume, setPrevVolume] = useState(volume > 0 ? volume : 0.5); // Track previous volume for mute toggle
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Update the display volume when the actual volume changes
   useEffect(() => {
@@ -82,6 +91,11 @@ export default function SettingsPage() {
     }
   };
 
+  // Don't render until client-side to prevent hydration mismatch with animation toggle
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="w-full flex-shrink-0">
@@ -99,6 +113,26 @@ export default function SettingsPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md space-y-8">
+
+          <div className="space-y-6 bg-card p-6 rounded-lg shadow-md">
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Game Settings</h2>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium">Animations</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Enable or disable game animations
+                  </p>
+                </div>
+                <Switch
+                  checked={animationsEnabled}
+                  onCheckedChange={toggleAnimations}
+                  aria-label="Toggle animations"
+                />
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-6 bg-card p-6 rounded-lg shadow-md">
             <div className="space-y-4">

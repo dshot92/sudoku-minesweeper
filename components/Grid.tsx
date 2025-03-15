@@ -14,7 +14,8 @@ const Grid: React.FC = () => {
     isLoading,
     initializeGame,
     handleCellClick,
-    isNewGridCreated
+    isNewGridCreated,
+    animationsEnabled
   } = useGame()
 
   // Animation states
@@ -38,7 +39,7 @@ const Grid: React.FC = () => {
   // Trigger animations when a new grid is created
   // This uses the isNewGridCreated flag from the context
   useEffect(() => {
-    if (isNewGridCreated) {
+    if (isNewGridCreated && animationsEnabled) {
       setIsNewGrid(true);
       // Increment grid counter to force new cell components
       setGridCounter(prev => prev + 1);
@@ -48,8 +49,11 @@ const Grid: React.FC = () => {
       }, 1000); // Animation duration
 
       return () => clearTimeout(timer);
+    } else if (isNewGridCreated) {
+      // Still increment grid counter even if animations are disabled
+      setGridCounter(prev => prev + 1);
     }
-  }, [isNewGridCreated]);
+  }, [isNewGridCreated, animationsEnabled]);
 
   // Force grid component refresh when grid size changes
   useEffect(() => {
@@ -61,14 +65,14 @@ const Grid: React.FC = () => {
 
   // Trigger shake animation when game is lost
   useEffect(() => {
-    if (gameOver && !gameWon) {
+    if (gameOver && !gameWon && animationsEnabled) {
       setShouldShake(true)
       const timer = setTimeout(() => {
         setShouldShake(false)
       }, 600) // Shake duration
       return () => clearTimeout(timer)
     }
-  }, [gameOver, gameWon])
+  }, [gameOver, gameWon, animationsEnabled])
 
   // Create a consistent container for the grid regardless of state
   return (
@@ -103,6 +107,7 @@ const Grid: React.FC = () => {
                   gameWon={gameWon}
                   rowIndex={rowIndex}
                   colIndex={colIndex}
+                  animationsEnabled={animationsEnabled}
                 />
               ))
             )}
