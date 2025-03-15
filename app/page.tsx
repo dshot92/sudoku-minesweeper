@@ -39,6 +39,11 @@ export default function Home() {
             className="block w-full p-4 text-center bg-primary text-primary-foreground rounded-lg "
           >
             How to Play
+          </Link>          <Link
+            href="/settings"
+            className="block w-full p-4 text-center bg-primary text-primary-foreground rounded-lg "
+          >
+            Settings
           </Link>
         </div>
       </div>

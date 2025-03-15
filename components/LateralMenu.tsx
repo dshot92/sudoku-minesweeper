@@ -12,15 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Menu, X, Volume2, VolumeX, Play, Pause } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
 import { useGame, GRID_PROGRESSION } from '@/contexts/GameContext';
-import { useAudio } from '@/contexts/AudioContext';
-import { Slider } from '@/components/ui/slider';
 
 export default function LateralMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { gridSize, setGridSize, setGameMode, gameMode, changeZenModeGridSize } = useGame();
-  const { volume, setVolume, isMuted, toggleMute, isPlaying, togglePlay } = useAudio();
   const pathname = usePathname();
 
   const handleGridSizeChange = (value: string) => {
@@ -46,10 +43,6 @@ export default function LateralMenu() {
   const handleModeChange = (mode: 'zen' | 'classic') => {
     setGameMode(mode);
     setIsOpen(false);
-  };
-
-  const handleVolumeChange = (values: number[]) => {
-    setVolume(values[0]);
   };
 
   return (
@@ -162,45 +155,6 @@ export default function LateralMenu() {
             )}
           </div>
 
-          {/* Audio Controls - placed at the bottom of the sidebar */}
-          <div className="mt-auto space-y-4 pt-6 border-t">
-            <h3 className="text-sm font-semibold text-muted-foreground">Audio Settings</h3>
-
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-10 w-10 border-foreground"
-                onClick={togglePlay}
-                aria-label={isPlaying ? "Pause music" : "Play music"}
-              >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-10 w-10 border-foreground"
-                onClick={toggleMute}
-                aria-label={isMuted ? "Unmute" : "Mute"}
-              >
-                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-              </Button>
-            </div>
-
-            <div className="pt-2">
-              <Slider
-                defaultValue={[volume]}
-                value={[volume]}
-                max={1}
-                step={0.01}
-                onValueChange={handleVolumeChange}
-                aria-label="Volume"
-                disabled={isMuted}
-                className={isMuted ? "opacity-50" : ""}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </>
