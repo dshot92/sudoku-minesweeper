@@ -32,54 +32,54 @@ export default function SettingsPage() {
     setDisplayVolume(Math.round(volume * 100));
   }, [volume]);
 
-  // Set initial muted state when component mounts
+  // Set initial audio state when component mounts
   useEffect(() => {
-    // Start with audio muted
-    if (!isMuted) {
+    if (mounted) {
+      // Ensure we have a valid volume set even when muted
+      if (volume === 0) {
+        setVolume(prevVolume);
+      }
+    } else {
       setIsMuted(true);
     }
-  }, [isMuted, setIsMuted]);
+  }, [mounted, setIsMuted, volume, prevVolume, setVolume]);
+
+  // Effect to handle audio playback when mute state changes
+  useEffect(() => {
+    if (mounted && !isMuted && volume > 0) {
+      // When unmuted with valid volume, try to play
+      playIfPossible();
+    }
+  }, [isMuted, mounted, volume, playIfPossible]);
 
   const handleVolumeChange = (values: number[]) => {
     const newVolume = values[0];
-
-    // Remember the previous non-zero volume for mute toggle
-    if (newVolume > 0) {
-      setPrevVolume(newVolume);
-    }
-
-    // If we're changing from 0 to a positive value, unmute
-    if (volume === 0 && newVolume > 0) {
-      setIsMuted(false);
-    }
-
-    // If we're muted and changing to a positive value, unmute
-    if (isMuted && newVolume > 0) {
-      setIsMuted(false);
-    }
-
     setVolume(newVolume);
 
-    // If we now have a positive volume and we're not muted, try to play
-    if (newVolume > 0 && !isMuted) {
-      playIfPossible();
+    if (newVolume > 0) {
+      setPrevVolume(newVolume);
+      // Automatically unmute when volume is increased from zero
+      if (volume === 0 || isMuted) {
+        setIsMuted(false);
+      }
+    } else {
+      // If volume is 0, stop playback
+      setIsMuted(true);
     }
   };
 
   const handleMuteToggle = () => {
     if (isMuted) {
-      // Unmuting - restore previous volume if current is 0
+      // Unmuting
+      // If volume is 0, restore previous volume first
       if (volume === 0) {
-        setVolume(prevVolume);
+        const volumeToSet = prevVolume > 0 ? prevVolume : 0.5;
+        setVolume(volumeToSet);
       }
+      // The useEffect will handle playing when unmuted
       setIsMuted(false);
-
-      // Try to play if we have volume
-      if (volume > 0 || prevVolume > 0) {
-        playIfPossible();
-      }
     } else {
-      // Muting - remember current volume if it's > 0
+      // Muting
       if (volume > 0) {
         setPrevVolume(volume);
       }
