@@ -255,11 +255,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const savedState = safelyParseJSON(savedStateJSON) as SavedGameState | null;
 
     if (savedState) {
-      console.log(`Restoring ${mode} mode state`, {
-        gridSize: savedState.gridSize,
-        gridLength: savedState.grid.length,
-        savedAt: new Date(savedState.timestamp).toISOString()
-      });
+      // console.log(`Restoring ${mode} mode state`, {
+      //   gridSize: savedState.gridSize,
+      //   gridLength: savedState.grid.length,
+      //   savedAt: new Date(savedState.timestamp).toISOString()
+      // });
 
       setGrid(savedState.grid);
       setGameOver(savedState.gameOver);

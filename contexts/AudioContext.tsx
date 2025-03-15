@@ -33,16 +33,16 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       // Set up event listeners
       audio.addEventListener('canplaythrough', () => {
         setAudioLoaded(true);
-        console.log('Audio loaded and ready to play');
+        // console.log('Audio loaded and ready to play');
       });
 
       audio.addEventListener('play', () => {
-        console.log('Audio started playing');
+        // console.log('Audio started playing');
         setIsPlaying(true);
       });
 
       audio.addEventListener('pause', () => {
-        console.log('Audio paused');
+        // console.log('Audio paused');
         // Only update isPlaying if we're not in the middle of a volume change
         if (audio.volume > 0 && !isMuted) {
           setIsPlaying(false);
@@ -50,7 +50,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       });
 
       audio.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
+        // console.error('Audio error:', e);
         setIsPlaying(false);
       });
 
