@@ -413,15 +413,10 @@ export const generateGridWithDifficulty = (
   size: number,
   difficulty: 'easy' | 'medium' | 'hard' | 'expert'
 ): CellState[][] => {
-  // Map difficulty to maximum percentage of revealed cells
-  const difficultyMap = {
-    'easy': 0.5,    // 50% of non-mine cells revealed
-    'medium': 0.3,  // 30% of non-mine cells revealed
-    'hard': 0.15,   // 15% of non-mine cells revealed
-    'expert': 0.05  // 5% of non-mine cells revealed
-  };
-
-  const percentage = difficultyMap[difficulty];
+  // Use dynamic difficulty thresholds from the utility function
+  const thresholds = getDifficultyThresholds(size);
+  const percentage = thresholds[difficulty];
+  
   const totalNonMineCells = size * size - size; // Total cells minus mines
   const maxCellsToReveal = Math.ceil(totalNonMineCells * percentage);
 
@@ -445,4 +440,95 @@ export const getAllCoordinates = (size: number): [number, number][] =>
     Array.from({ length: size }, (_, col) => [row, col] as [number, number])
   ).flat();
 
-export { generateLatinSquare }; 
+/**
+ * Get difficulty thresholds adjusted for grid size
+ * @param size The size of the grid
+ * @returns Object containing thresholds for each difficulty level
+ */
+export const getDifficultyThresholds = (size: number): {
+  easy: number;
+  medium: number;
+  hard: number;
+  expert: number;
+} => {
+  // Adjust based on grid size - larger grids are harder with same percentage
+  const sizeAdjustmentFactor = Math.log2(size) / Math.log2(4); // Normalized to size 4
+  
+  return {
+    easy: 0.45 - (0.05 * (sizeAdjustmentFactor - 1)),
+    medium: 0.25 - (0.05 * (sizeAdjustmentFactor - 1)),
+    hard: 0.12 - (0.03 * (sizeAdjustmentFactor - 1)),
+    expert: 0.05 - (0.01 * (sizeAdjustmentFactor - 1))
+  };
+};
+
+export { generateLatinSquare };
+
+/**
+ * Generates a puzzle grid following a step-by-step approach:
+ * 1. Creates connected components
+ * 2. Generates a Latin grid
+ * 3. Sets the minimum required revealed cells
+ * @param size The size of the grid (n×n)
+ * @param maxInitialRevealed Optional maximum number of initially revealed cells
+ * @returns A ready-to-play puzzle grid
+ */
+export const generateCustomGrid = (size: number, maxInitialRevealed?: number): CellState[][] => {
+  // Step 1: Create connected components
+  const { componentGrid } = createConnectedComponents(size);
+  
+  // Step 2: Generate a Latin square that respects component constraints
+  const latinSquare = generateLatinSquare(size, componentGrid);
+  
+  if (!latinSquare) {
+    throw new Error('Failed to generate a valid Latin square');
+  }
+  
+  // Step 3: Convert to CellState grid
+  const newGrid: CellState[][] = Array(size)
+    .fill(null)
+    .map((_, row) =>
+      Array(size)
+        .fill(null)
+        .map((_, col) => ({
+          value: latinSquare[row][col],
+          revealed: false,
+          isMine: false,
+          isFlag: false,
+          componentId: componentGrid[row][col],
+        }))
+    );
+  
+  // Step 4: Set mines (highest value in each component)
+  const componentHighestValues = new Map<number, { value: number; row: number; col: number }>();
+  
+  // Find highest value in each component
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const componentId = componentGrid[row][col];
+      const value = latinSquare[row][col];
+      
+      if (
+        !componentHighestValues.has(componentId) ||
+        value > componentHighestValues.get(componentId)!.value
+      ) {
+        componentHighestValues.set(componentId, { value, row, col });
+      }
+    }
+  }
+  
+  // Set mines
+  for (const { row, col } of componentHighestValues.values()) {
+    newGrid[row][col].isMine = true;
+  }
+  
+  // Step 5: Find minimum cells to reveal for a unique solution
+  const cellsToReveal = findMinimumRevealedCells(newGrid, componentGrid, maxInitialRevealed);
+  
+  // Set these cells as revealed by default
+  for (const { row, col } of cellsToReveal) {
+    newGrid[row][col].revealed = true;
+  }
+  
+  return newGrid;
+} 

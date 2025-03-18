@@ -21,7 +21,6 @@ import {
 import {
   findMinimumRevealedCells,
   generateHint,
-  calculateDifficulty,
   hasUniqueSolution,
   generatePuzzle
 } from './solve-logic';
@@ -44,7 +43,6 @@ export {
   // Solving functions
   findMinimumRevealedCells,
   generateHint,
-  calculateDifficulty,
   hasUniqueSolution,
   generatePuzzle,
   
