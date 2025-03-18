@@ -1,10 +1,10 @@
 /**
  * Represents the state of a cell in the game grid
  */
-export type CellState = {
+export interface CellState {
   value: number
   revealed: boolean
   isMine: boolean
   isFlag: boolean
   componentId: number
-}; 
+} 

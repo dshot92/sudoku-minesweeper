@@ -640,6 +640,53 @@ export const generatePuzzle = (filledGrid: number[][], componentGrid: number[][]
 };
 
 /**
+ * Create a shuffled array of coordinates
+ */
+const shuffleCoordinates = (size: number, seed: number = 0): [number, number][] => {
+  const coords: [number, number][] = [];
+  
+  // Instead of iterating row-by-row (which could introduce bias),
+  // Create coordinates in a more randomized order
+  for (let i = 0; i < size * size; i++) {
+    // Use a permutation pattern to distribute coordinates
+    const row = Math.floor(i / size);
+    const col = i % size;
+    coords.push([row, col]);
+  }
+  
+  // Use seed to get different shuffles for different attempts
+  // Simple hash function to make the rng different for each seed
+  const rng = (max: number) => {
+    let x = Math.sin((seed + 1) * (max + 0.5)) * 10000;
+    x = x - Math.floor(x);
+    return Math.floor(x * max);
+  };
+  
+  // Ensure thorough shuffle with multiple passes for better randomization
+  const shuffleArray = (array: [number, number][]) => {
+    // First do a Fisher-Yates shuffle
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = seed === 0 ? 
+        Math.floor(Math.random() * (i + 1)) : 
+        rng(i + 1);
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    
+    // Then do another pass with a different pattern
+    for (let i = 0; i < array.length - 2; i += 2) {
+      const j = seed === 0 ?
+        Math.floor(Math.random() * array.length) :
+        rng(array.length);
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    
+    return array;
+  };
+  
+  return shuffleArray(coords);
+};
+
+/**
  * Generate a single candidate puzzle
  * @param filledGrid The complete filled grid
  * @param componentGrid The component grid for constraints
@@ -662,16 +709,22 @@ const generateCandidatePuzzle = (
   // Get all coordinates in random order with different shuffling for each attempt
   const shuffledCoords = shuffleCoordinates(size, seed);
   
-  // Try different strategies based on the seed
-  if (seed % 3 === 0) {
+  // Try different strategies based on the seed with more variety
+  if (seed % 5 === 0) {
     // Strategy 1: Try revealing one cell per component
     revealOnePerComponent(puzzle, filledGrid, componentGrid, revealedCells);
-  } else if (seed % 3 === 1) {
+  } else if (seed % 5 === 1) {
     // Strategy 2: Try revealing cells in a diagonal pattern first
     revealDiagonalPattern(puzzle, filledGrid, componentGrid, revealedCells, shuffledCoords);
-  } else {
+  } else if (seed % 5 === 2) {
     // Strategy 3: Try revealing cells in a sparse pattern
     revealSparsePattern(puzzle, filledGrid, componentGrid, revealedCells, shuffledCoords);
+  } else if (seed % 5 === 3) {
+    // Strategy 4: Grid quadrants approach (new)
+    revealGridQuadrants(puzzle, filledGrid, componentGrid, revealedCells, shuffledCoords);
+  } else {
+    // Strategy 5: Pure random approach (new)
+    revealPureRandom(puzzle, filledGrid, componentGrid, revealedCells, shuffledCoords);
   }
   
   // Check if puzzle is already solvable with just these minimal cells
@@ -863,34 +916,147 @@ const revealSparsePattern = (
 };
 
 /**
- * Create a shuffled array of coordinates
+ * Reveal cells using a grid quadrants approach
  */
-const shuffleCoordinates = (size: number, seed: number = 0): [number, number][] => {
-  const coords: [number, number][] = [];
+const revealGridQuadrants = (
+  puzzle: number[][], 
+  filledGrid: number[][], 
+  componentGrid: number[][],
+  revealedCells: Set<string>,
+  shuffledCoords: [number, number][]
+): void => {
+  const size = puzzle.length;
+  const halfSize = Math.ceil(size / 2);
   
+  // Divide the grid into quadrants
+  const quadrants: [number, number, number, number][] = [
+    [0, 0, halfSize, halfSize],               // Top-left
+    [0, halfSize, halfSize, size],            // Top-right
+    [halfSize, 0, size, halfSize],            // Bottom-left
+    [halfSize, halfSize, size, size]          // Bottom-right
+  ];
+  
+  // Shuffle the quadrants to randomize which gets processed first
+  fisherYatesShuffle(quadrants);
+  
+  // For each quadrant, reveal at least one cell
+  for (const [startRow, startCol, endRow, endCol] of quadrants) {
+    const quadrantCoords = shuffledCoords.filter(
+      ([r, c]) => r >= startRow && r < endRow && c >= startCol && c < endCol
+    );
+    
+    let revealed = false;
+    
+    // Try to find and reveal a non-mine cell from this quadrant
+    for (const [row, col] of quadrantCoords) {
+      if (filledGrid[row][col] !== size) { // Not a mine
+        puzzle[row][col] = filledGrid[row][col];
+        revealedCells.add(`${row},${col}`);
+        revealed = true;
+        break;
+      }
+    }
+    
+    // If we couldn't find a non-mine cell in this quadrant, try the next one
+    if (!revealed) continue;
+  }
+  
+  // Ensure each component has at least one revealed cell like in other strategies
+  const components = new Set<number>();
+  const revealedComponents = new Set<number>();
+  
+  // Record which components already have revealed cells
+  for (const cellKey of revealedCells) {
+    const [row, col] = cellKey.split(',').map(Number);
+    revealedComponents.add(componentGrid[row][col]);
+  }
+  
+  // Get all components
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
-      coords.push([row, col]);
+      components.add(componentGrid[row][col]);
     }
   }
   
-  // Use seed to get different shuffles for different attempts
-  // Simple hash function to make the rng different for each seed
-  const rng = (max: number) => {
-    let x = Math.sin(seed + 1) * 10000;
-    x = x - Math.floor(x);
-    return Math.floor(x * max);
-  };
+  // Reveal one cell in each component that doesn't have a revealed cell yet
+  components.forEach(componentId => {
+    if (!revealedComponents.has(componentId)) {
+      const cellsInComponent = shuffledCoords.filter(
+        ([row, col]) => componentGrid[row][col] === componentId
+      );
+      
+      // Find a non-mine cell in this component
+      for (const [row, col] of cellsInComponent) {
+        if (filledGrid[row][col] !== size) { // Not a mine
+          puzzle[row][col] = filledGrid[row][col];
+          revealedCells.add(`${row},${col}`);
+          break;
+        }
+      }
+    }
+  });
+};
+
+/**
+ * Reveal cells using a pure random approach
+ */
+const revealPureRandom = (
+  puzzle: number[][], 
+  filledGrid: number[][], 
+  componentGrid: number[][],
+  revealedCells: Set<string>,
+  shuffledCoords: [number, number][]
+): void => {
+  const size = puzzle.length;
   
-  // Shuffle using Fisher-Yates with seeded RNG
-  for (let i = coords.length - 1; i > 0; i--) {
-    const j = seed === 0 ? 
-      Math.floor(Math.random() * (i + 1)) : 
-      rng(i + 1);
-    [coords[i], coords[j]] = [coords[j], coords[i]];
+  // First, randomly reveal a few cells from shuffled coordinates
+  const initialRevealCount = Math.max(3, Math.floor(size / 2));
+  let revealed = 0;
+  
+  for (const [row, col] of shuffledCoords) {
+    if (filledGrid[row][col] !== size) { // Not a mine
+      puzzle[row][col] = filledGrid[row][col];
+      revealedCells.add(`${row},${col}`);
+      revealed++;
+      
+      if (revealed >= initialRevealCount) break;
+    }
   }
   
-  return coords;
+  // Then ensure each component has at least one revealed cell
+  const components = new Set<number>();
+  const revealedComponents = new Set<number>();
+  
+  // Record which components already have revealed cells
+  for (const cellKey of revealedCells) {
+    const [row, col] = cellKey.split(',').map(Number);
+    revealedComponents.add(componentGrid[row][col]);
+  }
+  
+  // Get all components
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      components.add(componentGrid[row][col]);
+    }
+  }
+  
+  // Reveal one cell in each component that doesn't have a revealed cell yet
+  components.forEach(componentId => {
+    if (!revealedComponents.has(componentId)) {
+      const cellsInComponent = shuffledCoords.filter(
+        ([row, col]) => componentGrid[row][col] === componentId
+      );
+      
+      // Find a non-mine cell in this component
+      for (const [row, col] of cellsInComponent) {
+        if (filledGrid[row][col] !== size) { // Not a mine
+          puzzle[row][col] = filledGrid[row][col];
+          revealedCells.add(`${row},${col}`);
+          break;
+        }
+      }
+    }
+  });
 };
 
 /**
