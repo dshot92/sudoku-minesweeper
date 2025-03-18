@@ -1,6 +1,5 @@
 import { CellState } from './types';
-import { revealMinesInCompletedComponents, isGameWon } from './handle-click';
-import { findMinimumRevealedCells } from './solve-logic';
+import { revealMinesInCompletedComponents, isGameWon, findMinimumRevealedCells } from './solve-logic';
 
 /**
  * Generate a Latin square (n×n grid where each row and column contains n distinct values)

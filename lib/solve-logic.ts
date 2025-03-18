@@ -1194,3 +1194,71 @@ export const generateHint = (grid: CellState[][]): { row: number, col: number } 
   const randomIndex = Math.floor(Math.random() * hiddenNonMineCells.length);
   return hiddenNonMineCells[randomIndex];
 };
+
+/**
+ * Check if the game is won (all non-mine cells are revealed)
+ * @param grid The game grid to check
+ * @returns True if the game is won, false otherwise
+ */
+export const isGameWon = (grid: CellState[][]): boolean => {
+  const size = grid.length;
+  
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const cell = grid[row][col];
+      // If there's a non-mine cell that's not revealed, the game is not won
+      if (!cell.isMine && !cell.revealed) {
+        return false;
+      }
+    }
+  }
+  
+  return true;
+};
+
+/**
+ * Reveal mines in components where all non-mine cells are revealed
+ * @param grid The game grid
+ * @returns Updated grid with mines revealed in completed components
+ */
+export const revealMinesInCompletedComponents = (grid: CellState[][]): CellState[][] => {
+  const size = grid.length;
+  const newGrid = cloneDeep(grid);
+  
+  // Get all component IDs
+  const componentIds = new Set<number>();
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      componentIds.add(newGrid[row][col].componentId);
+    }
+  }
+  
+  // Check each component
+  componentIds.forEach(componentId => {
+    let allNonMinesRevealed = true;
+    const minePositions: { row: number, col: number }[] = [];
+    
+    // Find all mines and check if all non-mines are revealed
+    for (let row = 0; row < size; row++) {
+      for (let col = 0; col < size; col++) {
+        const cell = newGrid[row][col];
+        if (cell.componentId === componentId) {
+          if (cell.isMine) {
+            minePositions.push({ row, col });
+          } else if (!cell.revealed) {
+            allNonMinesRevealed = false;
+          }
+        }
+      }
+    }
+    
+    // If all non-mines are revealed, reveal the mines
+    if (allNonMinesRevealed) {
+      minePositions.forEach(({ row, col }) => {
+        newGrid[row][col].revealed = true;
+      });
+    }
+  });
+  
+  return newGrid;
+};
