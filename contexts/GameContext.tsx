@@ -389,7 +389,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     setHints(gameInitSize);
 
-    const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
+    const worker = new Worker(new URL('../workers/sudoku-minesweeper.worker', import.meta.url));
 
     worker.onmessage = (event: MessageEvent) => {
       if (event.data.error) {
@@ -529,7 +529,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     // Use a timeout to ensure state updates have been applied before generating the grid
     setTimeout(() => {
       // Generate a new grid with the updated size
-      const worker = new Worker(new URL('/workers/sudoku-minesweeper.worker', import.meta.url));
+      const worker = new Worker(new URL('../workers/sudoku-minesweeper.worker', import.meta.url));
 
       worker.onmessage = (event: MessageEvent) => {
         if (event.data.error) {
