@@ -19,6 +19,9 @@
 
 # production
 /build
+workbox-*
+swe-worker-*
+fallback-*.js
 
 # misc
 .DS_Store
