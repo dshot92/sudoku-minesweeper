@@ -16,13 +16,13 @@ export default function GameLayout({
       <header className="w-full h-[72px]">
         <div className="container h-full mt-2 p-4 flex items-center">
           <div className="flex-1 flex justify-start">
-            <LateralMenu />
+            <HintButton />
           </div>
           <div className="flex-1 flex justify-center">
             <NewGameButton />
           </div>
           <div className="flex-1 flex justify-end">
-            <HintButton />
+            <LateralMenu />
           </div>
         </div>
       </header>
