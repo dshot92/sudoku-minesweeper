@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "A unique blend of Sudoku and Minesweeper",
   manifest: "/manifest.json",
   icons: {
-    icon: '/icons/icon-blue.ico',
+    icon: '/favicon/favicon.svg',
   },
   appleWebApp: {
     capable: true,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#000000",
+  themeColor: "#020617",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
