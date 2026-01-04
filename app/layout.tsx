@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: "A unique blend of Sudoku and Minesweeper",
   manifest: "/manifest.json",
   icons: {
-    icon: '/favicon/favicon.svg',
+    icon: '/favicon/favicon-tab.svg',
   },
   appleWebApp: {
     capable: true,
