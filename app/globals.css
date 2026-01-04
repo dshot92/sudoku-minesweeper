@@ -3,19 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Your Exact Colors */
+  --background: #f8fafc;
+  --foreground: #020617;
+
+  /* Popover: Matches background, text matches foreground */
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+
+  /* Primary: High contrast (Inverse of background) */
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+
+  /* Secondary: A subtle "step down" from the white background */
+  --secondary: oklch(0.93 0.01 247.83); 
+  --secondary-foreground: var(--foreground);
+
+  /* Muted: Softened for background elements or non-essential text */
+  --muted: oklch(0.95 0.005 247.83);
+  --muted-foreground: oklch(0.45 0.02 264.43); /* Tinted toward your navy */
+
+  /* Borders & Inputs: Subtle but defined */
+  --border: oklch(0.91 0.01 247.83);
+  --input: oklch(0.91 0.01 247.83);
+  
+  /* Ring: Focus state (matches your navy but softer) */
+  --ring: oklch(0.65 0.03 264.43);
+
   --radius: 0.625rem;
 
   /* Component Colors */
@@ -32,19 +46,32 @@
 }
 
 .dark {
-  --background: oklch(0 0 0);
-  --foreground: oklch(1 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  /* Your Exact Colors */
+  --background: #020617;
+  --foreground: #f8fafc;
+
+  /* Popover & Cards: Slightly lighter than background for "elevation" */
+  --popover: oklch(0.17 0.027 264.43);
+  --popover-foreground: var(--foreground);
+
+  /* Primary: High contrast (Inverse of background) */
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+
+  /* Secondary: Subtle surface for buttons/toggles */
+  --secondary: oklch(0.22 0.02 264.43);
+  --secondary-foreground: var(--foreground);
+
+  /* Muted: De-emphasized elements */
+  --muted: oklch(0.19 0.02 264.43);
+  --muted-foreground: oklch(0.70 0.015 247.83); /* Tinted toward foreground */
+
+  /* Borders & Inputs: Defined but low contrast */
+  --border: oklch(0.25 0.02 264.43);
+  --input: oklch(0.25 0.02 264.43);
+  
+  /* Ring: Focus state (visible against the dark blue) */
+  --ring: oklch(0.45 0.03 264.43);
 }
 
 @layer base {
